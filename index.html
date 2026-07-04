@@ -363,6 +363,17 @@
     function utf8ToBase64(str) { const bytes = new TextEncoder().encode(str); const binString = Array.from(bytes, byte => String.fromCodePoint(byte)).join(''); return btoa(binString); }
     function base64ToUtf8(b64) { const binString = atob(b64); const bytes = Uint8Array.from(binString, m => m.codePointAt(0)); return new TextDecoder().decode(bytes); }
 
+    // ISO 周数计算（周一为每周第一天）
+    function getISOWeekNumber(dateStr) {
+      const parts = dateStr.split('-');
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+      d.setHours(0,0,0,0);
+      d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+      const yearStart = new Date(d.getFullYear(), 0, 1);
+      const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+      return weekNo;
+    }
+
     function showAuthMsg(msg, err=true) { const el=document.getElementById('authMsg'); if(!el) return; el.textContent=msg; el.style.color=err?'#ff6b6b':'#2ecc71'; setTimeout(()=>el.textContent='',3000); }
 
     function showMain() {
@@ -503,7 +514,7 @@
       modal.querySelector('.modal-content button').addEventListener('click',close);
     }
 
-    // 力量面板（优化布局，无完成添加）
+    // 力量面板（周数显示 & 按钮布局优化）
     let currentStrengthMonday = getMonday(formatDate(new Date()));
     function setStrengthMonday(d){ currentStrengthMonday=d; renderStrengthWeek(); }
     document.getElementById('prevWeekBtn').addEventListener('click', ()=>setStrengthMonday(addWeek(currentStrengthMonday,-1)));
@@ -515,7 +526,9 @@
     document.getElementById('volumeWeekBtn').addEventListener('click', ()=>{ const p=getPlan(currentStrengthMonday); p.weekType=p.weekType==='volume'?null:'volume'; save(); updateWeekTypeButtons(); showToast(p.weekType==='volume'?'💧 容量周':'取消标记'); });
 
     function renderStrengthWeek(){
-      document.getElementById('currentWeekLabel').textContent=currentStrengthMonday+' 周'; updateWeekTypeButtons();
+      const weekNum = getISOWeekNumber(currentStrengthMonday);
+      document.getElementById('currentWeekLabel').textContent = `${currentStrengthMonday.slice(0,4)}-W${weekNum}`;
+      updateWeekTypeButtons();
       const plan=getPlan(currentStrengthMonday), grid=document.getElementById('weekGrid'); grid.innerHTML='';
       const today=formatDate(new Date()), days=['一','二','三','四','五','六','日'];
       for(let i=0;i<7;i++){ const d=new Date(currentStrengthMonday+'T00:00:00'); d.setDate(d.getDate()+i); const ds=formatDate(d); const dd=plan.days[i]||{muscles:[]}; const names=(dd.muscles||[]).length>0?dd.muscles.map(m=>m.muscleGroup).filter(Boolean).join(',')||'休息':'休息'; const cell=document.createElement('div'); cell.className='day-cell'; if(ds===today) cell.classList.add('today'); cell.innerHTML=`<strong>周${days[i]}</strong><br><span style="font-size:9px;">${ds.slice(5)}</span><br><span style="font-size:10px;">${names}</span>`; cell.addEventListener('click',()=>showDayDetail(i)); grid.appendChild(cell); }
@@ -565,7 +578,10 @@
         html += `<div id="inputArea-${mIdx}" style="display:none; margin-top:6px;">
           <div style="display:flex;gap:4px;"><select id="exSel-${mIdx}" style="flex:1;font-size:12px;"><option value="">选择动作</option>${all.map(e=>'<option>'+e+'</option>').join('')}</select><button class="small add-custom-btn" data-midx="${mIdx}">+</button></div>
           <div style="display:flex;gap:3px;margin:4px 0;"><input id="wt-${mIdx}" placeholder="重量" type="number" step="0.5" style="flex:1;"><input id="rep-${mIdx}" placeholder="次数" type="number" style="flex:1;"><input id="set-${mIdx}" placeholder="组数" type="number" style="flex:1;"></div>
-          <button class="small add-ex-btn" data-midx="${mIdx}" style="margin-top:4px;">添加动作</button>
+          <div style="display:flex;gap:6px;">
+            <button class="small add-ex-btn" data-midx="${mIdx}" style="flex:1;">添加动作</button>
+            <button class="small cancel-add-btn" data-midx="${mIdx}" style="flex:1; background:#4a69bd;">取消</button>
+          </div>
         </div>`;
       }
       container.innerHTML = html;
@@ -584,16 +600,18 @@
       const showAdd = document.getElementById(`showAdd-${mIdx}`);
       const inputArea = document.getElementById(`inputArea-${mIdx}`);
       if(showAdd && inputArea) {
-        showAdd.addEventListener('click', function(e){
-          e.stopPropagation();
-          const isVisible = inputArea.style.display === 'block';
-          if (isVisible) {
-            inputArea.style.display = 'none';
-            showAdd.textContent = '+ 新增动作';
-          } else {
-            inputArea.style.display = 'block';
-            showAdd.textContent = '取消添加';
-          }
+        showAdd.addEventListener('click', ()=>{ inputArea.style.display = 'block'; });
+        const cancelBtn = document.querySelector(`.cancel-add-btn[data-midx="${mIdx}"]`);
+        if(cancelBtn) cancelBtn.addEventListener('click', ()=>{ inputArea.style.display = 'none'; });
+
+        document.querySelector(`.add-ex-btn[data-midx="${mIdx}"]`)?.addEventListener('click', ()=>{
+          const s=document.getElementById(`exSel-${mIdx}`), w=document.getElementById(`wt-${mIdx}`), r=document.getElementById(`rep-${mIdx}`), st=document.getElementById(`set-${mIdx}`);
+          if(!s||!w||!r||!st) return; const name=s.value, weight=parseFloat(w.value), reps=parseInt(r.value), sets=parseInt(st.value);
+          if(!name||isNaN(weight)||isNaN(reps)||isNaN(sets)) return showToast('完整填写');
+          if(!muscle.exercises) muscle.exercises=[];
+          muscle.exercises.push({name,weight,reps,sets}); save();
+          inputArea.style.display = 'none';
+          renderExerciseArea(container,muscle,mIdx);
         });
       }
 
@@ -603,16 +621,6 @@
           if(!currentUser.customExercises[muscle.muscleGroup]) currentUser.customExercises[muscle.muscleGroup]=[];
           if(!currentUser.customExercises[muscle.muscleGroup].includes(n.trim())){ currentUser.customExercises[muscle.muscleGroup].push(n.trim()); save(); renderExerciseArea(container,muscle,mIdx); }
         }
-      });
-      document.querySelector(`.add-ex-btn[data-midx="${mIdx}"]`)?.addEventListener('click', ()=>{
-        const s=document.getElementById(`exSel-${mIdx}`), w=document.getElementById(`wt-${mIdx}`), r=document.getElementById(`rep-${mIdx}`), st=document.getElementById(`set-${mIdx}`);
-        if(!s||!w||!r||!st) return; const name=s.value, weight=parseFloat(w.value), reps=parseInt(r.value), sets=parseInt(st.value);
-        if(!name||isNaN(weight)||isNaN(reps)||isNaN(sets)) return showToast('完整填写');
-        if(!muscle.exercises) muscle.exercises=[];
-        muscle.exercises.push({name,weight,reps,sets}); save();
-        if(inputArea) inputArea.style.display = 'none';
-        if(showAdd) showAdd.textContent = '+ 新增动作';
-        renderExerciseArea(container,muscle,mIdx);
       });
       document.querySelectorAll(`.modEx[data-midx="${mIdx}"]`).forEach(b=>b.addEventListener('click',function(){
         const ei=+this.dataset.eidx; const ex=muscle.exercises[ei]; const nw=prompt('新重量',ex.weight), nr=prompt('新次数',ex.reps), ns=prompt('新组数',ex.sets);
@@ -630,14 +638,16 @@
     document.getElementById('addPrExerciseBtn').addEventListener('click',()=>{const mg=document.getElementById('prMuscleGroup').value;if(!mg)return;const n=prompt('新动作：');if(n?.trim()){if(!currentUser.customExercises)currentUser.customExercises={};if(!currentUser.customExercises[mg])currentUser.customExercises[mg]=[];if(!currentUser.customExercises[mg].includes(n.trim())){currentUser.customExercises[mg].push(n.trim());save();updatePrList(mg);}}});
     document.getElementById('calc1RM').addEventListener('click',()=>{const w=parseFloat(document.getElementById('weightInput').value),r=parseInt(document.getElementById('repsInput').value);if(isNaN(w)||isNaN(r)||r<1)return showToast('有效值');const rm=formulas[document.getElementById('prFormula').value](w,r).toFixed(1);document.getElementById('rmResult').textContent='💥 '+rm+' kg';});
 
-    // 形体面板
+    // 形体面板（周数显示）
     let currentPhysiqueMonday = getMonday(formatDate(new Date()));
     function setPhysiqueMonday(d){ currentPhysiqueMonday=d; renderPhysiquePanel(); }
     document.getElementById('physiquePrevWeek').addEventListener('click',()=>setPhysiqueMonday(addWeek(currentPhysiqueMonday,-1)));
     document.getElementById('physiqueNextWeek').addEventListener('click',()=>setPhysiqueMonday(addWeek(currentPhysiqueMonday,1)));
     document.getElementById('todayPhysiqueBtn').addEventListener('click',()=>setPhysiqueMonday(getMonday(formatDate(new Date()))));
     async function renderPhysiquePanel(){
-      document.getElementById('physiqueWeekLabel').textContent=currentPhysiqueMonday+' 周'; const grid=document.getElementById('physiqueWeekGrid'); grid.innerHTML='';
+      const weekNum = getISOWeekNumber(currentPhysiqueMonday);
+      document.getElementById('physiqueWeekLabel').textContent = `${currentPhysiqueMonday.slice(0,4)}-W${weekNum}`;
+      const grid=document.getElementById('physiqueWeekGrid'); grid.innerHTML='';
       const today=formatDate(new Date()), days=['一','二','三','四','五','六','日'];
       for(let i=0;i<7;i++){ const d=new Date(currentPhysiqueMonday+'T00:00:00'); d.setDate(d.getDate()+i); const ds=formatDate(d); const key='physique_'+ds; const imgs=await getUserImages(currentUser,key); const lm=getMonthOffset(ds,-1), t3=getMonthOffset(ds,-3); const lmgs=await getUserImages(currentUser,'physique_'+lm), t3gs=await getUserImages(currentUser,'physique_'+t3); const cell=document.createElement('div'); cell.className='day-cell'; if(ds===today) cell.classList.add('today'); let h=`<strong>周${days[i]}</strong><br><span style="font-size:8px;">${ds.slice(5)}</span><br>`; if(imgs.length) h+=`<img src="${imgs[0]}" class="img-thumb-small" style="width:24px;"> `; else h+='<span style="color:#555;">-</span> '; h+=`<button class="small" style="padding:1px 4px;font-size:8px;">📷</button><br><div class="physique-row"><span class="physique-label">上月</span>`; if(lmgs.length) h+=`<img src="${lmgs[0]}" class="img-thumb-small" data-date="${lm}">`; else h+='<span style="color:#555;">无</span>'; h+=`</div><div class="physique-row"><span class="physique-label">3月</span>`; if(t3gs.length) h+=`<img src="${t3gs[0]}" class="img-thumb-small" data-date="${t3}">`; else h+='<span style="color:#555;">无</span>'; h+=`</div>`; cell.innerHTML=h; cell.querySelector('button').addEventListener('click',e=>{e.stopPropagation();document.getElementById('physiqueTargetDate').value=ds;document.getElementById('physiqueImageUpload').click();}); if(imgs.length){ cell.querySelector(`img[src="${imgs[0]}"]`)?.addEventListener('click',e=>{e.stopPropagation();showPhysiqueViewer(ds,imgs,0);}); } cell.querySelectorAll('.img-thumb-small[data-date]').forEach(img=>img.addEventListener('click',async e=>{e.stopPropagation();const td=e.target.dataset.date;const arr=await getUserImages(currentUser,'physique_'+td);if(arr.length)showPhysiqueViewer(td,arr,0);})); grid.appendChild(cell); }
     }
@@ -703,7 +713,7 @@
     window.addEventListener('beforeunload', ()=>{ if(currentUser) localStorage.setItem('lastLoggedUID_v2', currentUser.uid); saveAllUsers(); });
     setInterval(()=>{ if(currentUser) saveAllUsers(); }, 30000);
     document.addEventListener('touchstart', ()=>{}, {passive: true});
-    console.log('⚡ 我独自升级 - 全功能版已运行');
+    console.log('⚡ 我独自升级 - 完全优化版已运行');
   })();
 </script>
 </body>
