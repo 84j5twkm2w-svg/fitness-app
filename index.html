@@ -353,7 +353,7 @@
       '手臂': ['杠铃弯举','锤式弯举','三头下压','窄距卧推','集中弯举','牧师椅弯举','绳索锤式弯举','双杠臂屈伸（臂）','仰卧臂屈伸']
     };
 
-    function getMonday(d) { const p=d.split('-'); const dt=new Date(p[0],p[1]-1,p[2]); dt.setDate(dt.getDate()-(dt.getDay()===0?6:1-dt.getDay())); return formatDate(dt); }
+    function getMonday(d) { const p=d.split('-'); const dt=new Date(p[0],p[1]-1,p[2]); const dayOfWeek = dt.getDay(); const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; dt.setDate(dt.getDate() + diff); return formatDate(dt); }
     function formatDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
     function addWeek(m,w) { const p=m.split('-'); const d=new Date(p[0],p[1]-1,p[2]); d.setDate(d.getDate()+w*7); return formatDate(d); }
     function getMonthOffset(d,o) { const [y,m,day]=d.split('-').map(Number); const dt=new Date(y,m-1,day); dt.setMonth(dt.getMonth()+o); return formatDate(dt); }
@@ -363,7 +363,6 @@
     function utf8ToBase64(str) { const bytes = new TextEncoder().encode(str); const binString = Array.from(bytes, byte => String.fromCodePoint(byte)).join(''); return btoa(binString); }
     function base64ToUtf8(b64) { const binString = atob(b64); const bytes = Uint8Array.from(binString, m => m.codePointAt(0)); return new TextDecoder().decode(bytes); }
 
-    // ISO 周数计算（周一为每周第一天）
     function getISOWeekNumber(dateStr) {
       const parts = dateStr.split('-');
       const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
@@ -514,9 +513,16 @@
       modal.querySelector('.modal-content button').addEventListener('click',close);
     }
 
-    // 力量面板（周数显示 & 按钮布局优化）
+    // 力量面板（自动滚动到今天）
     let currentStrengthMonday = getMonday(formatDate(new Date()));
-    function setStrengthMonday(d){ currentStrengthMonday=d; renderStrengthWeek(); }
+    function setStrengthMonday(d) {
+      currentStrengthMonday = d;
+      renderStrengthWeek();
+      setTimeout(() => {
+        const todayCell = document.querySelector('.day-cell.today');
+        if (todayCell) todayCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
     document.getElementById('prevWeekBtn').addEventListener('click', ()=>setStrengthMonday(addWeek(currentStrengthMonday,-1)));
     document.getElementById('nextWeekBtn').addEventListener('click', ()=>setStrengthMonday(addWeek(currentStrengthMonday,1)));
     document.getElementById('todayStrengthBtn').addEventListener('click', ()=>setStrengthMonday(getMonday(formatDate(new Date()))));
@@ -531,7 +537,7 @@
       updateWeekTypeButtons();
       const plan=getPlan(currentStrengthMonday), grid=document.getElementById('weekGrid'); grid.innerHTML='';
       const today=formatDate(new Date()), days=['一','二','三','四','五','六','日'];
-      for(let i=0;i<7;i++){ const d=new Date(currentStrengthMonday+'T00:00:00'); d.setDate(d.getDate()+i); const ds=formatDate(d); const dd=plan.days[i]||{muscles:[]}; const names=(dd.muscles||[]).length>0?dd.muscles.map(m=>m.muscleGroup).filter(Boolean).join(',')||'休息':'休息'; const cell=document.createElement('div'); cell.className='day-cell'; if(ds===today) cell.classList.add('today'); cell.innerHTML=`<strong>周${days[i]}</strong><br><span style="font-size:9px;">${ds.slice(5)}</span><br><span style="font-size:10px;">${names}</span>`; cell.addEventListener('click',()=>showDayDetail(i)); grid.appendChild(cell); }
+      for(let i=0;i<7;i++){ const d=new Date(currentStrengthMonday+'T00:00:00'); d.setDate(d.getDate()+i); const ds=formatDate(d); const dd=plan.days[i]||{muscles:[]}; const names=(dd.muscles||[]).length>0?dd.muscles.map(m=>m.muscleGroup).filter(Boolean).join(',')||'休息':'休息'; const cell=document.createElement('div'); cell.className='day-cell'; if(ds===today) { cell.classList.add('today'); cell.id = 'today-cell'; } cell.innerHTML=`<strong>周${days[i]}</strong><br><span style="font-size:9px;">${ds.slice(5)}</span><br><span style="font-size:10px;">${names}</span>`; cell.addEventListener('click',()=>showDayDetail(i)); grid.appendChild(cell); }
     }
 
     function showDayDetail(dayIdx){
@@ -638,9 +644,16 @@
     document.getElementById('addPrExerciseBtn').addEventListener('click',()=>{const mg=document.getElementById('prMuscleGroup').value;if(!mg)return;const n=prompt('新动作：');if(n?.trim()){if(!currentUser.customExercises)currentUser.customExercises={};if(!currentUser.customExercises[mg])currentUser.customExercises[mg]=[];if(!currentUser.customExercises[mg].includes(n.trim())){currentUser.customExercises[mg].push(n.trim());save();updatePrList(mg);}}});
     document.getElementById('calc1RM').addEventListener('click',()=>{const w=parseFloat(document.getElementById('weightInput').value),r=parseInt(document.getElementById('repsInput').value);if(isNaN(w)||isNaN(r)||r<1)return showToast('有效值');const rm=formulas[document.getElementById('prFormula').value](w,r).toFixed(1);document.getElementById('rmResult').textContent='💥 '+rm+' kg';});
 
-    // 形体面板（周数显示）
+    // 形体面板（自动滚动到今天）
     let currentPhysiqueMonday = getMonday(formatDate(new Date()));
-    function setPhysiqueMonday(d){ currentPhysiqueMonday=d; renderPhysiquePanel(); }
+    function setPhysiqueMonday(d) {
+      currentPhysiqueMonday = d;
+      renderPhysiquePanel();
+      setTimeout(() => {
+        const todayCell = document.querySelector('#physiqueWeekGrid .day-cell.today');
+        if (todayCell) todayCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
     document.getElementById('physiquePrevWeek').addEventListener('click',()=>setPhysiqueMonday(addWeek(currentPhysiqueMonday,-1)));
     document.getElementById('physiqueNextWeek').addEventListener('click',()=>setPhysiqueMonday(addWeek(currentPhysiqueMonday,1)));
     document.getElementById('todayPhysiqueBtn').addEventListener('click',()=>setPhysiqueMonday(getMonday(formatDate(new Date()))));
@@ -649,7 +662,7 @@
       document.getElementById('physiqueWeekLabel').textContent = `${currentPhysiqueMonday.slice(0,4)}-W${weekNum}`;
       const grid=document.getElementById('physiqueWeekGrid'); grid.innerHTML='';
       const today=formatDate(new Date()), days=['一','二','三','四','五','六','日'];
-      for(let i=0;i<7;i++){ const d=new Date(currentPhysiqueMonday+'T00:00:00'); d.setDate(d.getDate()+i); const ds=formatDate(d); const key='physique_'+ds; const imgs=await getUserImages(currentUser,key); const lm=getMonthOffset(ds,-1), t3=getMonthOffset(ds,-3); const lmgs=await getUserImages(currentUser,'physique_'+lm), t3gs=await getUserImages(currentUser,'physique_'+t3); const cell=document.createElement('div'); cell.className='day-cell'; if(ds===today) cell.classList.add('today'); let h=`<strong>周${days[i]}</strong><br><span style="font-size:8px;">${ds.slice(5)}</span><br>`; if(imgs.length) h+=`<img src="${imgs[0]}" class="img-thumb-small" style="width:24px;"> `; else h+='<span style="color:#555;">-</span> '; h+=`<button class="small" style="padding:1px 4px;font-size:8px;">📷</button><br><div class="physique-row"><span class="physique-label">上月</span>`; if(lmgs.length) h+=`<img src="${lmgs[0]}" class="img-thumb-small" data-date="${lm}">`; else h+='<span style="color:#555;">无</span>'; h+=`</div><div class="physique-row"><span class="physique-label">3月</span>`; if(t3gs.length) h+=`<img src="${t3gs[0]}" class="img-thumb-small" data-date="${t3}">`; else h+='<span style="color:#555;">无</span>'; h+=`</div>`; cell.innerHTML=h; cell.querySelector('button').addEventListener('click',e=>{e.stopPropagation();document.getElementById('physiqueTargetDate').value=ds;document.getElementById('physiqueImageUpload').click();}); if(imgs.length){ cell.querySelector(`img[src="${imgs[0]}"]`)?.addEventListener('click',e=>{e.stopPropagation();showPhysiqueViewer(ds,imgs,0);}); } cell.querySelectorAll('.img-thumb-small[data-date]').forEach(img=>img.addEventListener('click',async e=>{e.stopPropagation();const td=e.target.dataset.date;const arr=await getUserImages(currentUser,'physique_'+td);if(arr.length)showPhysiqueViewer(td,arr,0);})); grid.appendChild(cell); }
+      for(let i=0;i<7;i++){ const d=new Date(currentPhysiqueMonday+'T00:00:00'); d.setDate(d.getDate()+i); const ds=formatDate(d); const key='physique_'+ds; const imgs=await getUserImages(currentUser,key); const lm=getMonthOffset(ds,-1), t3=getMonthOffset(ds,-3); const lmgs=await getUserImages(currentUser,'physique_'+lm), t3gs=await getUserImages(currentUser,'physique_'+t3); const cell=document.createElement('div'); cell.className='day-cell'; if(ds===today) { cell.classList.add('today'); cell.id = 'today-physique-cell'; } let h=`<strong>周${days[i]}</strong><br><span style="font-size:8px;">${ds.slice(5)}</span><br>`; if(imgs.length) h+=`<img src="${imgs[0]}" class="img-thumb-small" style="width:24px;"> `; else h+='<span style="color:#555;">-</span> '; h+=`<button class="small" style="padding:1px 4px;font-size:8px;">📷</button><br><div class="physique-row"><span class="physique-label">上月</span>`; if(lmgs.length) h+=`<img src="${lmgs[0]}" class="img-thumb-small" data-date="${lm}">`; else h+='<span style="color:#555;">无</span>'; h+=`</div><div class="physique-row"><span class="physique-label">3月</span>`; if(t3gs.length) h+=`<img src="${t3gs[0]}" class="img-thumb-small" data-date="${t3}">`; else h+='<span style="color:#555;">无</span>'; h+=`</div>`; cell.innerHTML=h; cell.querySelector('button').addEventListener('click',e=>{e.stopPropagation();document.getElementById('physiqueTargetDate').value=ds;document.getElementById('physiqueImageUpload').click();}); if(imgs.length){ cell.querySelector(`img[src="${imgs[0]}"]`)?.addEventListener('click',e=>{e.stopPropagation();showPhysiqueViewer(ds,imgs,0);}); } cell.querySelectorAll('.img-thumb-small[data-date]').forEach(img=>img.addEventListener('click',async e=>{e.stopPropagation();const td=e.target.dataset.date;const arr=await getUserImages(currentUser,'physique_'+td);if(arr.length)showPhysiqueViewer(td,arr,0);})); grid.appendChild(cell); }
     }
     document.getElementById('physiqueImageUpload').addEventListener('change', async function(e){
       const files=Array.from(e.target.files); if(!files.length) return; const ds=document.getElementById('physiqueTargetDate').value; if(!ds) return;
