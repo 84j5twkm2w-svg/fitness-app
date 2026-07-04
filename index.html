@@ -1,2286 +1,1113 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="我独自升级">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0f0c29">
-    <meta name="description" content="我独自升级 - 健身记录与形体追踪">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230f0c29'/><text y='0.85em' x='50' text-anchor='middle' font-size='70'>⚡</text></svg>">
-    <title>⚡我独自升级 - 健身记录</title>
-
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi5oiR54us6Ieq5Y2H57qnIC0g5YGl6Lqr6K6w5b2VIiwic2hvcnRfbmFtZSI6IuaIkeeLrOiHquWNh+e6pyIsImRlc2NyaXB0aW9uIjoi5YGl6Lqr6K6w5b2V5LiO5b2i5L2T6L275Liq5bqU55SoIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0IiwiYmFja2dyb3VuZF9jb2xvciI6IiMwZjBjMjkiLCJ0aGVtZV9jb2xvciI6IiMwZjBjMjkiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxOTIgMTkyJyUzRSUzQ3JlY3Qgd2lkdGg9JzE5MicgaGVpZ2h0PScxOTInIHJ4PSczMicgZmlsbD0nJTIzMGYwYzI5Jy8lM0UlM0N0ZXh0IHg9Jzk2JyB5PScxMjAnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtc2l6ZT0nMTAwJyUzRSVFMiU5QSVBMSUzQy90ZXh0JTNFJTNDL3N2ZyUzRSIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9XX0=">
-
-    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js">
-    </script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js">
-    </script>
-    <style>
-        :root {
-            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-            --safe-area-top: env(safe-area-inset-top, 0px);
-            --bg-deep: #0f0c29;
-            --bg-card: #1f2b4d;
-            --accent: #ff6b6b;
-            --accent2: #ee5a24;
-            --text: #e0e0e0;
-            --text-dim: #aaa;
-            --border: #3a4a6b;
-            --tap-min: 44px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-touch-callout: none;
-        }
-        input,
-        select,
-        textarea,
-        [contenteditable] {
-            -webkit-user-select: text;
-            user-select: text;
-            -webkit-touch-callout: default;
-        }
-        html {
-            height: 100%;
-            overflow-x: hidden;
-        }
-        body {
-            background: linear-gradient(160deg, var(--bg-deep) 0%, #1a1040 25%, #302b63 50%, #24243e 75%, #0f0c29 100%);
-            background-attachment: fixed;
-            color: var(--text);
-            min-height: 100vh;
-            min-height: 100dvh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 8px;
-            padding-top: calc(8px + var(--safe-area-top));
-            padding-bottom: calc(12px + var(--safe-area-bottom));
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: contain;
-        }
-        .container {
-            width: 100%;
-            max-width: 500px;
-            background: rgba(22, 33, 62, 0.94);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
-            padding: 20px 14px;
-            margin: 0 auto;
-            transition: border-radius 0.3s;
-        }
-        h2,
-        h3 {
-            text-align: center;
-            margin-bottom: 14px;
-            letter-spacing: 0.5px;
-        }
-        .login-box h2 {
-            color: var(--accent);
-            font-size: 28px;
-            letter-spacing: 2px;
-            text-shadow: 0 0 30px rgba(255, 107, 107, 0.4);
-        }
-        input,
-        select,
-        button {
-            width: 100%;
-            padding: 13px 14px;
-            margin: 7px 0;
-            border-radius: 14px;
-            border: none;
-            font-size: 16px;
-            outline: none;
-            transition: 0.2s ease;
-            -webkit-appearance: none;
-            appearance: none;
-            min-height: var(--tap-min);
-        }
-        input,
-        select {
-            background: var(--bg-card);
-            color: #eee;
-            border: 1px solid var(--border);
-            font-size: 15px;
-        }
-        input:focus,
-        select:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 10px rgba(255, 107, 107, 0.35);
-            background: #243358;
-        }
-        input::placeholder {
-            color: #777;
-        }
-        button {
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            letter-spacing: 0.4px;
-            min-height: var(--tap-min);
-            touch-action: manipulation;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        button:active {
-            transform: scale(0.96);
-            opacity: 0.9;
-            transition: 0.08s;
-        }
-        button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none;
-        }
-        button.secondary {
-            background: linear-gradient(135deg, #4a69bd, #1e3799);
-        }
-        button.ghost {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text);
-        }
-        button.small {
-            width: auto;
-            padding: 8px 13px;
-            font-size: 13px;
-            min-height: 36px;
-            border-radius: 10px;
-        }
-        .hidden {
-            display: none !important;
-        }
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            margin: 14px 0;
-            gap: 4px;
-            flex-wrap: wrap;
-        }
-        .nav button {
-            flex: 1;
-            min-width: 48px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 10px 3px;
-            font-size: 11px;
-            border-radius: 12px;
-            min-height: 42px;
-            letter-spacing: 0;
-        }
-        .nav button.active {
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border: none;
-            color: white;
-            font-weight: 700;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-        }
-        .chart-wrapper {
-            margin: 14px 0;
-        }
-        #weightChartDiv {
-            width: 100%;
-            height: 340px;
-            border-radius: 14px;
-            overflow: hidden;
-            min-height: 280px;
-            background: rgba(31, 43, 77, 0.5);
-        }
-        .week-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 3px;
-        }
-        .day-cell {
-            background: var(--bg-card);
-            padding: 5px 2px;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 10px;
-            transition: 0.15s;
-            min-height: 105px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            touch-action: manipulation;
-            border: 1px solid transparent;
-        }
-        .day-cell:active {
-            background: #2a3a5e;
-            transform: scale(0.95);
-            border-color: var(--accent);
-        }
-        .day-cell.has-data {
-            border-color: rgba(255, 107, 107, 0.5);
-        }
-        .day-cell.today {
-            box-shadow: 0 0 12px rgba(255, 107, 107, 0.3);
-            border-color: var(--accent);
-        }
-        .stats-card {
-            background: var(--bg-card);
-            padding: 12px;
-            border-radius: 12px;
-            margin: 7px 0;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-        }
-        .week-navigator {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            gap: 4px;
-            flex-wrap: wrap;
-        }
-        .week-navigator button {
-            width: auto;
-            padding: 8px 12px;
-            font-size: 13px;
-            min-height: 38px;
-        }
-        .file-upload-wrapper {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            margin: 8px 0;
-            flex-wrap: wrap;
-        }
-        .file-upload-wrapper input[type="file"] {
-            display: none;
-        }
-        .file-btn {
-            flex: 1;
-            text-align: center;
-            padding: 12px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            cursor: pointer;
-            font-size: 14px;
-            min-height: var(--tap-min);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            touch-action: manipulation;
-        }
-        .file-btn:active {
-            background: #2a3a5e;
-        }
-        .download-btn {
-            background: #4a69bd;
-            color: white;
-            border: none;
-            min-height: var(--tap-min);
-        }
-        .period-select {
-            margin: 7px 0;
-        }
-        .period-select select {
-            font-size: 15px;
-            padding: 12px;
-        }
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            height: 100dvh;
-            background: rgba(0, 0, 0, 0.88);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 12px;
-            animation: fadeIn 0.2s ease;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-        .modal-content {
-            background: #16213e;
-            padding: 18px;
-            border-radius: 20px;
-            width: 95%;
-            max-width: 500px;
-            max-height: 82vh;
-            max-height: 82dvh;
-            overflow-y: auto;
-            color: #eee;
-            position: relative;
-            -webkit-overflow-scrolling: touch;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .img-thumb {
-            width: 34px;
-            height: 34px;
-            object-fit: cover;
-            border-radius: 6px;
-            margin: 2px;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .img-thumb-small {
-            width: 22px;
-            height: 22px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin: 1px;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        .image-viewer img {
-            max-width: 100%;
-            max-height: 55vh;
-            max-height: 55dvh;
-            border-radius: 10px;
-            object-fit: contain;
-        }
-        .image-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-            gap: 8px;
-        }
-        .image-nav button {
-            min-height: 40px;
-            font-size: 14px;
-            padding: 8px 16px;
-        }
-        .friend-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 6px;
-            border-bottom: 1px solid #333;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        table.stats-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-            text-align: center;
-        }
-        table.stats-table th,
-        table.stats-table td {
-            padding: 5px 3px;
-            border-bottom: 1px solid #333;
-            text-align: center;
-            word-break: break-all;
-        }
-        .muscle-group-header {
-            background: #0f3460;
-            font-weight: bold;
-            font-size: 12px;
-        }
-        .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2d2d2d;
-            color: #fff;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 14px;
-            z-index: 2000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-            max-width: 85vw;
-            text-align: center;
-        }
-        .phase-btn-small {
-            padding: 10px 8px;
-            border-radius: 10px;
-            background: var(--bg-card);
-            text-align: center;
-            cursor: pointer;
-            font-weight: bold;
-            flex: 1;
-            user-select: none;
-            touch-action: manipulation;
-            min-height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            border: 1px solid var(--border);
-        }
-        .phase-btn-small.strength.active {
-            background: #e74c3c;
-            color: #fff;
-            border-color: #c0392b;
-        }
-        .phase-btn-small.volume.active {
-            background: #3498db;
-            color: #fff;
-            border-color: #2980b9;
-        }
-        .muscle-block {
-            background: #0f3460;
-            padding: 8px;
-            border-radius: 10px;
-            margin-bottom: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .ex-table {
-            width: 100%;
-            font-size: 11px;
-            border-collapse: collapse;
-            margin: 5px 0;
-        }
-        .ex-table th,
-        .ex-table td {
-            padding: 3px 2px;
-            border-bottom: 1px solid #333;
-            text-align: center;
-        }
-        .ex-table input,
-        .ex-table select {
-            margin: 0;
-            padding: 6px 4px;
-            font-size: 11px;
-            width: 100%;
-            min-height: 30px;
-            border-radius: 8px;
-        }
-        .ex-list-container {
-            max-height: 120px;
-            overflow-y: auto;
-            margin-bottom: 5px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .physique-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            margin: 1px 0;
-        }
-        .physique-label {
-            font-size: 7px;
-            color: var(--text-dim);
-            width: 32px;
-            text-align: right;
-            padding-right: 2px;
-        }
-        .collapsible {
-            cursor: pointer;
-            touch-action: manipulation;
-            min-height: var(--tap-min);
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            user-select: none;
-        }
-        .collapsible-content {
-            display: none;
-            margin-top: 4px;
-        }
-        .collapsible.active+.collapsible-content {
-            display: block;
-        }
-
-        #installBanner {
-            display: none;
-            background: linear-gradient(135deg, #1a3a5c, #2c5f8a);
-            color: #fff;
-            padding: 13px 16px;
-            border-radius: 14px;
-            margin: 8px 0;
-            text-align: center;
-            cursor: pointer;
-            font-weight: bold;
-            animation: pulse 2s infinite;
-            touch-action: manipulation;
-            min-height: var(--tap-min);
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        @keyframes pulse {
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.5);
-            }
-            50% {
-                box-shadow: 0 0 0 14px rgba(255, 107, 107, 0);
-            }
-        }
-
-        .storage-bar {
-            height: 6px;
-            border-radius: 3px;
-            background: #333;
-            margin: 6px 0;
-            overflow: hidden;
-        }
-        .storage-bar-fill {
-            height: 100%;
-            border-radius: 3px;
-            background: linear-gradient(90deg, #27ae60, #f39c12, #e74c3c);
-            transition: width 0.5s;
-        }
-
-        @media (max-width: 370px) {
-            .nav button {
-                font-size: 10px;
-                padding: 8px 2px;
-                min-height: 38px;
-            }
-            .day-cell {
-                font-size: 8px;
-                min-height: 85px;
-                padding: 3px 1px;
-            }
-            .container {
-                padding: 14px 8px;
-                border-radius: 18px;
-            }
-            h2 {
-                font-size: 20px;
-            }
-            .phase-btn-small {
-                font-size: 11px;
-                padding: 8px 4px;
-            }
-        }
-        @media (min-width: 420px) {
-            .day-cell {
-                min-height: 120px;
-                font-size: 11px;
-            }
-            .nav button {
-                font-size: 13px;
-                padding: 10px 6px;
-            }
-        }
-        @media (hover: hover) {
-            button:hover {
-                filter: brightness(1.08);
-            }
-            .day-cell:hover {
-                background: #253558;
-                border-color: rgba(255, 107, 107, 0.3);
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="我独自升级">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0f0c29">
+  <meta name="description" content="我独自升级 - 健身记录与形体追踪">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230f0c29'/><text y='0.85em' x='50' text-anchor='middle' font-size='70'>⚡</text></svg>">
+  <title>⚡我独自升级 - 健身记录</title>
+  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi5oiR54us6Ieq5Y2H57qnIC0g5YGl6Lqr6K6w5b2VIiwic2hvcnRfbmFtZSI6IuaIkeeLrOiHquWNh+e6pyIsImRlc2NyaXB0aW9uIjoi5YGl6Lqr6K6w5b2V5LiO5b2i5L2T6L275Liq5bqU55SoIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0IiwiYmFja2dyb3VuZF9jb2xvciI6IiMwZjBjMjkiLCJ0aGVtZV9jb2xvciI6IiMwZjBjMjkiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxOTIgMTkyJyUzRSUzQ3JlY3Qgd2lkdGg9JzE5MicgaGVpZ2h0PScxOTInIHJ4PSczMicgZmlsbD0nJTIzMGYwYzI5Jy8lM0UlM0N0ZXh0IHg9Jzk2JyB5PScxMjAnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtc2l6ZT0nMTAwJyUzRSVFMiU5QSVBMSUzQy90ZXh0JTNFJTNDL3N2ZyUzRSIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9XX0=">
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-area-top: env(safe-area-inset-top, 0px);
+      --bg-deep: #0f0c29;
+      --bg-card: #1f2b4d;
+      --accent: #ff6b6b;
+      --accent2: #ee5a24;
+      --text: #e0e0e0;
+      --text-dim: #aaa;
+      --border: #3a4a6b;
+      --tap-min: 44px;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    input, select, textarea, [contenteditable] {
+      -webkit-user-select: text;
+      user-select: text;
+      -webkit-touch-callout: default;
+    }
+    html {
+      height: 100%;
+      overflow-x: hidden;
+    }
+    body {
+      background: linear-gradient(160deg, var(--bg-deep) 0%, #1a1040 25%, #302b63 50%, #24243e 75%, #0f0c29 100%);
+      background-attachment: fixed;
+      color: var(--text);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 8px;
+      padding-top: calc(8px + var(--safe-area-top));
+      padding-bottom: calc(12px + var(--safe-area-bottom));
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: rgba(22, 33, 62, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06) inset;
+      padding: 20px 14px;
+      margin: auto;
+      transition: border-radius 0.3s;
+    }
+    h2, h3 {
+      text-align: center;
+      margin-bottom: 14px;
+      letter-spacing: 0.5px;
+    }
+    .login-box h2 {
+      color: var(--accent);
+      font-size: 28px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 30px rgba(255,107,107,0.4);
+    }
+    input, select, button {
+      width: 100%;
+      padding: 13px 14px;
+      margin: 7px 0;
+      border-radius: 14px;
+      border: none;
+      font-size: 16px;
+      outline: none;
+      transition: 0.2s ease;
+      -webkit-appearance: none;
+      appearance: none;
+      min-height: var(--tap-min);
+    }
+    input, select {
+      background: var(--bg-card);
+      color: #eee;
+      border: 1px solid var(--border);
+      font-size: 15px;
+    }
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(255,107,107,0.35);
+      background: #243358;
+    }
+    input::placeholder { color: #777; }
+    button {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.4px;
+      min-height: var(--tap-min);
+      touch-action: manipulation;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    button:active {
+      transform: scale(0.96);
+      opacity: 0.9;
+      transition: 0.08s;
+    }
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+    button.secondary {
+      background: linear-gradient(135deg, #4a69bd, #1e3799);
+    }
+    button.ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    button.small {
+      width: auto;
+      padding: 8px 13px;
+      font-size: 13px;
+      min-height: 36px;
+      border-radius: 10px;
+    }
+    .hidden { display: none !important; }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin: 14px 0;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .nav button {
+      flex: 1;
+      min-width: 48px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 10px 3px;
+      font-size: 11px;
+      border-radius: 12px;
+      min-height: 42px;
+      letter-spacing: 0;
+    }
+    .nav button.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(255,107,107,0.3);
+    }
+    .chart-wrapper { margin: 14px 0; }
+    #weightChartDiv {
+      width: 100%;
+      height: 340px;
+      border-radius: 14px;
+      overflow: hidden;
+      min-height: 280px;
+      background: rgba(31,43,77,0.5);
+    }
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+    .day-cell {
+      background: var(--bg-card);
+      padding: 5px 2px;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 10px;
+      transition: 0.15s;
+      min-height: 105px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      touch-action: manipulation;
+      border: 1px solid transparent;
+    }
+    .day-cell:active {
+      background: #2a3a5e;
+      transform: scale(0.95);
+      border-color: var(--accent);
+    }
+    .day-cell.today {
+      box-shadow: 0 0 12px rgba(255,107,107,0.4);
+      border-color: var(--accent);
+    }
+    .stats-card {
+      background: var(--bg-card);
+      padding: 12px;
+      border-radius: 12px;
+      margin: 7px 0;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .week-navigator {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .week-navigator button {
+      width: auto;
+      padding: 8px 12px;
+      font-size: 13px;
+      min-height: 38px;
+    }
+    .file-upload-wrapper {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin: 8px 0;
+      flex-wrap: wrap;
+    }
+    .file-upload-wrapper input[type="file"] { display: none; }
+    .file-btn {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 14px;
+      min-height: var(--tap-min);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .file-btn:active { background: #2a3a5e; }
+    .download-btn {
+      background: #4a69bd;
+      color: white;
+      border: none;
+      min-height: var(--tap-min);
+    }
+    .period-select { margin: 7px 0; }
+    .period-select select {
+      font-size: 15px;
+      padding: 12px;
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%; height: 100dvh;
+      background: rgba(0,0,0,0.88);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 12px;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-content {
+      background: #16213e;
+      padding: 18px;
+      border-radius: 20px;
+      width: 95%;
+      max-width: 500px;
+      max-height: 82vh;
+      max-height: 82dvh;
+      overflow-y: auto;
+      color: #eee;
+      position: relative;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .img-thumb {
+      width: 34px; height: 34px; object-fit: cover; border-radius: 6px; margin: 2px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+    }
+    .img-thumb-small {
+      width: 22px; height: 22px; object-fit: cover; border-radius: 4px; margin: 1px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);
+    }
+    .image-viewer img {
+      max-width: 100%; max-height: 55vh; max-height: 55dvh; border-radius: 10px; object-fit: contain;
+    }
+    .image-nav {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 8px;
+    }
+    .image-nav button { min-height: 40px; font-size: 14px; padding: 8px 16px; }
+    .friend-list-item {
+      display: flex; justify-content: space-between; align-items: center; padding: 10px 6px; border-bottom: 1px solid #333; flex-wrap: wrap; gap: 6px;
+    }
+    table.stats-table {
+      width: 100%; border-collapse: collapse; font-size: 11px; text-align: center;
+    }
+    table.stats-table th, table.stats-table td {
+      padding: 5px 3px; border-bottom: 1px solid #333; text-align: center; word-break: break-all;
+    }
+    .muscle-group-header { background: #0f3460; font-weight: bold; font-size: 12px; }
+    .toast {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      background: #2d2d2d; color: #fff; padding: 12px 24px; border-radius: 30px;
+      font-size: 14px; z-index: 2000; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease; box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+      max-width: 85vw; text-align: center;
+    }
+    .phase-btn-small {
+      padding: 10px 8px; border-radius: 10px; background: var(--bg-card); text-align: center;
+      cursor: pointer; font-weight: bold; flex: 1; user-select: none; touch-action: manipulation;
+      min-height: 42px; display: flex; align-items: center; justify-content: center;
+      font-size: 13px; border: 1px solid var(--border);
+    }
+    .phase-btn-small.strength.active { background: #e74c3c; color:#fff; border-color:#c0392b; }
+    .phase-btn-small.volume.active { background: #3498db; color:#fff; border-color:#2980b9; }
+    .muscle-block {
+      background: #0f3460; padding: 8px; border-radius: 10px; margin-bottom: 6px; border: 1px solid rgba(255,255,255,0.05);
+    }
+    .ex-table { width:100%; font-size:11px; border-collapse:collapse; margin:5px 0; }
+    .ex-table th, .ex-table td { padding:3px 2px; border-bottom:1px solid #333; text-align:center; }
+    .ex-table input, .ex-table select {
+      margin:0; padding:6px 4px; font-size:11px; width:100%; min-height:30px; border-radius:8px;
+    }
+    .ex-list-container { max-height:120px; overflow-y:auto; margin-bottom:5px; -webkit-overflow-scrolling:touch; }
+    .physique-row { display:flex; align-items:center; justify-content:center; gap:2px; margin:1px 0; }
+    .physique-label { font-size:7px; color:var(--text-dim); width:32px; text-align:right; padding-right:2px; }
+    .collapsible {
+      cursor:pointer; touch-action:manipulation; min-height:var(--tap-min); display:flex; align-items:center; padding:12px; user-select:none;
+    }
+    .collapsible-content { display:none; margin-top:4px; }
+    .collapsible.active+.collapsible-content { display:block; }
+    #installBanner {
+      display:none; background:linear-gradient(135deg,#1a3a5c,#2c5f8a); color:#fff; padding:13px 16px;
+      border-radius:14px; margin:8px 0; text-align:center; cursor:pointer; font-weight:bold;
+      animation:pulse 2s infinite; touch-action:manipulation; min-height:var(--tap-min);
+      align-items:center; justify-content:center; gap:8px; font-size:14px; border:1px solid rgba(255,255,255,0.2);
+    }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,107,107,0.5)} 50%{box-shadow:0 0 0 14px rgba(255,107,107,0)} }
+    .quick-login-item {
+      background: var(--bg-card); padding: 10px; border-radius: 12px; margin: 6px 0;
+      display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+      border: 1px solid var(--border); font-size: 15px; touch-action: manipulation; min-height: 48px;
+    }
+    .quick-login-item:active { background: #2a3a5e; }
+    @media (max-width: 370px) {
+      .nav button { font-size:10px; padding:8px 2px; min-height:38px; }
+      .day-cell { font-size:8px; min-height:85px; padding:3px 1px; }
+      .container { padding:14px 8px; border-radius:18px; }
+      h2 { font-size:20px; }
+      .phase-btn-small { font-size:11px; padding:8px 4px; }
+    }
+    @media (min-width: 420px) {
+      .day-cell { min-height:120px; font-size:11px; }
+      .nav button { font-size:13px; padding:10px 6px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container" id="app">
-        <!-- PWA安装横幅 -->
-        <div id="installBanner">📲 点击安装到手机主屏幕</div>
+<div class="container" id="app">
+  <div id="installBanner">📲 点击安装到手机主屏幕</div>
 
-        <!-- 登录界面 -->
-        <div id="auth-screen">
-            <div class="login-box">
-                <h2>⚡ 我独自升级</h2>
-                <input type="text" id="username" placeholder="用户名" autocomplete="username" inputmode="text" autocapitalize="none">
-                <input type="password" id="password" placeholder="密码" autocomplete="current-password">
-                <button type="button" id="loginBtn">登 录</button>
-                <button type="button" id="regBtn" class="secondary">注 册 新 账 号</button>
-                <p id="authMsg" style="text-align:center;margin-top:12px;min-height:20px;font-weight:bold;font-size:14px;"></p>
-            </div>
-        </div>
-
-        <!-- 主界面 -->
-        <div id="main-screen" class="hidden">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                <h2 style="color:#ff6b6b;margin:0;font-size:22px;">⚡ 我独自升级</h2>
-                <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <button type="button" id="storageInfoBtn" class="small ghost" style="font-size:10px;">💾</button>
-                    <button type="button" id="logoutBtn" class="small ghost">退出</button>
-                </div>
-            </div>
-            <p style="font-size:12px;opacity:0.8;">👤 <span id="myName"></span> | UID: <span id="myUid"></span></p>
-            <div style="display:flex;gap:6px;margin:6px 0;flex-wrap:wrap;">
-                <button id="weeklyReportBtn" class="secondary" style="flex:1;min-width:110px;">📈 本周统计</button>
-                <button id="refreshReportBtn" class="small secondary" style="flex:1;min-width:70px;">🔄 刷新</button>
-            </div>
-
-            <div class="nav">
-                <button type="button" class="active" data-panel="weight">⚖️体重</button>
-                <button type="button" data-panel="strength">💪力量</button>
-                <button type="button" data-panel="onerm">🏋️1PR</button>
-                <button type="button" data-panel="physique">📷形体</button>
-                <button type="button" data-panel="friends">👥朋友</button>
-            </div>
-
-            <!-- 体重面板 -->
-            <div id="weight-panel" class="panel">
-                <div class="period-select">
-                    <select id="periodDropdown">
-                        <option value="7d">7天</option>
-                        <option value="14d">14天</option>
-                        <option value="30d">30天</option>
-                        <option value="this_month">本月</option>
-                        <option value="last_month">上月</option>
-                        <option value="60d">60天</option>
-                        <option value="90d">90天</option>
-                        <option value="this_year">本年</option>
-                        <option value="last_year">去年</option>
-                        <option value="all" selected>全部</option>
-                    </select>
-                </div>
-                <div class="stats-card">
-                    <p style="margin-bottom:6px;font-weight:600;">📅 今日体重快速记录</p>
-                    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-                        <input id="quickWeight" type="number" placeholder="体重 (kg)" step="0.1" style="flex:2;min-width:90px;" inputmode="decimal">
-                        <select id="quickPhase" style="flex:1;min-width:70px;">
-                            <option value="bulk">增肌期</option>
-                            <option value="cut">减脂期</option>
-                        </select>
-                    </div>
-                    <button id="quickRecordBtn">记录今日体重</button>
-                </div>
-                <div class="collapsible stats-card" id="manualDateToggle" style="font-size:14px;">
-                    📆 手动选择日期记录 <span style="font-size:11px;opacity:0.7;">(点击展开)</span>
-                </div>
-                <div class="collapsible-content">
-                    <div class="stats-card">
-                        <input type="date" id="weightDate">
-                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                            <input type="number" id="weightValue" placeholder="体重 (kg)" step="0.1" style="flex:2;min-width:90px;" inputmode="decimal">
-                            <select id="weightPhaseSelect" style="flex:1;min-width:70px;">
-                                <option value="bulk">增肌期</option>
-                                <option value="cut">减脂期</option>
-                            </select>
-                        </div>
-                        <button id="addWeightBtn">记录体重</button>
-                    </div>
-                </div>
-                <div class="chart-wrapper">
-                    <div id="weightChartDiv"></div>
-                </div>
-                <div id="weightSuggestion" class="stats-card" style="color:#ff9f43;font-size:13px;"></div>
-                <div class="file-upload-wrapper" style="margin-top:14px;">
-                    <label for="xlsxUpload" class="file-btn">📂 上传 Excel 批量导入</label>
-                    <input type="file" id="xlsxUpload" accept=".xlsx,.xls">
-                    <button id="mapXlsxBtn" class="small download-btn" disabled>映射替换</button>
-                    <button id="downloadTemplateBtn" class="small download-btn">⬇️ 模板</button>
-                </div>
-            </div>
-
-            <!-- 力量面板 -->
-            <div id="strength-panel" class="panel hidden">
-                <div class="week-navigator">
-                    <button id="prevWeekBtn" class="small">◀ 上周</button>
-                    <span id="currentWeekLabel" style="font-size:13px;font-weight:600;"></span>
-                    <button id="nextWeekBtn" class="small">下周 ▶</button>
-                    <button id="todayStrengthBtn" class="small">今天</button>
-                </div>
-                <div class="week-grid" id="weekGrid"></div>
-                <div style="display:flex;gap:6px;margin:8px 0;">
-                    <div id="strengthWeekBtn" class="phase-btn-small strength">🔥 增力周</div>
-                    <div id="volumeWeekBtn" class="phase-btn-small volume">💧 容量周</div>
-                </div>
-                <div id="dayDetail" style="margin-top:10px;"></div>
-            </div>
-
-            <!-- 1PR面板 -->
-            <div id="onerm-panel" class="panel hidden">
-                <h3>最大1PR推算</h3>
-                <select id="prMuscleGroup">
-                    <option value="">选择肌群</option>
-                    <option value="胸部">胸部</option>
-                    <option value="背部">背部</option>
-                    <option value="腿部">腿部</option>
-                    <option value="肩部">肩部</option>
-                    <option value="手臂">手臂</option>
-                </select>
-                <select id="prExercise" class="hidden"></select>
-                <button id="addPrExerciseBtn" class="small secondary hidden">+ 添加动作</button>
-                <input type="number" id="repsInput" placeholder="完成的次数" inputmode="numeric">
-                <input type="number" id="weightInput" placeholder="使用的重量 (kg)" inputmode="decimal">
-                <select id="prFormula" style="margin:7px 0;">
-                    <option value="epley" selected>Epley (1 + 次数/30)</option>
-                    <option value="brzycki">Brzycki (36/(37-次数))</option>
-                    <option value="lombardi">Lombardi (次数^0.1)</option>
-                    <option value="mayhew">Mayhew</option>
-                    <option value="lander">Lander</option>
-                </select>
-                <button id="calc1RM">计 算</button>
-                <p id="rmResult" style="text-align:center;font-size:30px;margin-top:14px;color:#ff6b6b;font-weight:700;"></p>
-                <p id="formulaUsed" style="text-align:center;color:#aaa;font-size:13px;"></p>
-            </div>
-
-            <!-- 形体面板 -->
-            <div id="physique-panel" class="panel hidden">
-                <div class="week-navigator">
-                    <button id="physiquePrevWeek" class="small">◀ 上周</button>
-                    <span id="physiqueWeekLabel" style="font-size:13px;font-weight:600;"></span>
-                    <button id="physiqueNextWeek" class="small">下周 ▶</button>
-                    <button id="todayPhysiqueBtn" class="small">今天</button>
-                </div>
-                <div class="week-grid" id="physiqueWeekGrid"></div>
-                <input type="file" id="physiqueImageUpload" accept="image/*" capture="environment" multiple style="display:none;">
-                <input type="hidden" id="physiqueTargetDate">
-                <div id="physiqueUploadStatus" style="text-align:center;margin-top:6px;color:#aaa;font-size:12px;"></div>
-            </div>
-
-            <!-- 朋友面板 -->
-            <div id="friends-panel" class="panel hidden">
-                <h3>朋友数据</h3>
-                <input type="text" id="friendUidInput" placeholder="输入好友UID" inputmode="numeric" style="text-align:center;">
-                <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
-                    <button id="addFriendBtn" style="flex:1;min-width:90px;">添加并查看</button>
-                    <button id="refreshFriendDataBtn" class="small secondary" style="flex:1;min-width:90px;">刷新当前好友</button>
-                </div>
-                <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
-                    <button id="exportMyDataBtn" class="small secondary">📤 复制数据</button>
-                    <button id="exportMyDataFileBtn" class="small secondary">💾 导出文件</button>
-                    <button id="importFriendDataBtn" class="small secondary">📥 导入好友数据</button>
-                </div>
-                <div id="friendList" class="stats-card" style="margin-top:6px;"></div>
-                <div id="friendData" class="stats-card" style="margin-top:10px;display:none;"></div>
-            </div>
-        </div>
+  <!-- 登录界面 -->
+  <div id="auth-screen">
+    <div class="login-box">
+      <h2>⚡ 我独自升级</h2>
+      <input type="text" id="username" placeholder="用户名" autocomplete="username" inputmode="text" autocapitalize="none">
+      <input type="password" id="password" placeholder="密码" autocomplete="current-password">
+      <button type="button" id="loginBtn">登 录</button>
+      <button type="button" id="regBtn" class="secondary">注 册 新 账 号</button>
+      <div id="quickLoginArea" style="margin-top:8px;"></div>
+      <p id="authMsg" style="text-align:center;margin-top:10px;min-height:20px;font-weight:bold;font-size:14px;"></p>
     </div>
-    <div id="toast" class="toast"></div>
-
-    <script>
-        (function() {
-            // ========== PWA 安装横幅 ==========
-            let deferredPrompt = null;
-            const installBanner = document.getElementById('installBanner');
-
-            window.addEventListener('beforeinstallprompt', function(e) {
-                e.preventDefault();
-                deferredPrompt = e;
-                if (installBanner) {
-                    installBanner.style.display = 'flex';
-                }
-            });
-
-            if (installBanner) {
-                installBanner.addEventListener('click', function() {
-                    if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                        deferredPrompt.userChoice.then(function(result) {
-                            if (result.outcome === 'accepted') {
-                                installBanner.style.display = 'none';
-                                showToast('✅ 应用已安装到主屏幕');
-                            }
-                            deferredPrompt = null;
-                        });
-                    } else {
-                        installBanner.style.display = 'none';
-                        showToast('💡 请使用浏览器菜单中的"添加到主屏幕"');
-                    }
-                });
-            }
-
-            window.addEventListener('appinstalled', function() {
-                if (installBanner) installBanner.style.display = 'none';
-                deferredPrompt = null;
-            });
-
-            // ========== Toast 提示 ==========
-            let toastTimeout;
-
-            function showToast(msg, duration = 2000) {
-                const toast = document.getElementById('toast');
-                if (!toast) return;
-                toast.textContent = msg;
-                toast.style.opacity = '1';
-                toast.style.pointerEvents = 'auto';
-                clearTimeout(toastTimeout);
-                toastTimeout = setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.pointerEvents = 'none';
-                }, duration);
-            }
-
-            // ========== 数据存储 ==========
-            const STORAGE_KEY = 'solo_leveling_users_v2';
-            let allUsers = {};
-            let imgDB = null;
-            const IMG_DB_NAME = 'SoloLevelingImagesV2';
-            const IMG_STORE = 'images';
-
-            function loadAllUsers() {
-                try {
-                    const raw = localStorage.getItem(STORAGE_KEY);
-                    allUsers = raw ? JSON.parse(raw) : {};
-                    if (typeof allUsers !== 'object' || allUsers === null) {
-                        allUsers = {};
-                        localStorage.setItem(STORAGE_KEY, '{}');
-                    }
-                } catch (e) {
-                    allUsers = {};
-                    localStorage.setItem(STORAGE_KEY, '{}');
-                }
-                // 数据迁移：确保所有用户有必要的字段
-                let needsSave = false;
-                for (const uid in allUsers) {
-                    const u = allUsers[uid];
-                    if (!u.weightRecords) { u.weightRecords = [];
-                        needsSave = true; }
-                    if (!u.weeklyPlans) { u.weeklyPlans = {};
-                        needsSave = true; }
-                    if (!u.friends) { u.friends = [];
-                        needsSave = true; }
-                    if (!u.customExercises) { u.customExercises = {};
-                        needsSave = true; }
-                }
-                if (needsSave) saveAllUsers();
-            }
-
-            function saveAllUsers() {
-                try {
-                    const json = JSON.stringify(allUsers);
-                    localStorage.setItem(STORAGE_KEY, json);
-                } catch (e) {
-                    if (e.name === 'QuotaExceededError') {
-                        showToast('⚠️ 存储空间不足！正在清理旧图片...', 4000);
-                        cleanOldImages();
-                        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(allUsers)); } catch (e2) {
-                            showToast('❌ 存储空间严重不足，请导出数据并清理', 5000);
-                        }
-                    }
-                }
-            }
-
-            function getStorageUsage() {
-                let total = 0;
-                try {
-                    for (let key in localStorage) {
-                        if (localStorage.hasOwnProperty(key)) {
-                            total += localStorage[key].length * 2; // UTF-16
-                        }
-                    }
-                } catch (e) {}
-                return total;
-            }
-
-            function formatBytes(bytes) {
-                if (bytes < 1024) return bytes + ' B';
-                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-                return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-            }
-
-            function cleanOldImages() {
-                // 清理超过90天未访问的图片
-                const now = new Date();
-                const cutoff = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
-                const cutoffStr = formatDate(cutoff);
-                for (const uid in allUsers) {
-                    const user = allUsers[uid];
-                    const keys = Object.keys(user).filter(k => k.startsWith('physique_'));
-                    const oldKeys = keys.filter(k => {
-                        const dateStr = k.replace('physique_', '');
-                        return dateStr < cutoffStr;
-                    });
-                    if (oldKeys.length > 10) {
-                        oldKeys.slice(0, oldKeys.length - 5).forEach(k => {
-                            delete user[k];
-                            deleteImageFromDB(uid + '_' + k).catch(() => {});
-                        });
-                    }
-                }
-            }
-
-            // IndexedDB
-            function openImgDB() {
-                return new Promise((resolve, reject) => {
-                    if (imgDB) return resolve(imgDB);
-                    const request = indexedDB.open(IMG_DB_NAME, 1);
-                    request.onupgradeneeded = function(e) {
-                        const db = e.target.result;
-                        if (!db.objectStoreNames.contains(IMG_STORE)) {
-                            db.createObjectStore(IMG_STORE, { keyPath: 'id' });
-                        }
-                    };
-                    request.onsuccess = function(e) {
-                        imgDB = e.target.result;
-                        resolve(imgDB);
-                    };
-                    request.onerror = function(e) {
-                        console.warn('IndexedDB不可用，仅使用localStorage');
-                        reject(e);
-                    };
-                });
-            }
-
-            async function saveImageToDB(key, imagesArray) {
-                try {
-                    const db = await openImgDB();
-                    const tx = db.transaction(IMG_STORE, 'readwrite');
-                    const store = tx.objectStore(IMG_STORE);
-                    store.put({ id: key, images: imagesArray });
-                    return new Promise((resolve, reject) => { tx.oncomplete = resolve;
-                        tx.onerror = reject; });
-                } catch (e) { return null; }
-            }
-
-            async function loadImageFromDB(key) {
-                try {
-                    const db = await openImgDB();
-                    const tx = db.transaction(IMG_STORE, 'readonly');
-                    const store = tx.objectStore(IMG_STORE);
-                    const result = await new Promise((resolve, reject) => {
-                        const req = store.get(key);
-                        req.onsuccess = () => resolve(req.result);
-                        req.onerror = reject;
-                    });
-                    return result ? result.images : null;
-                } catch (e) { return null; }
-            }
-
-            async function deleteImageFromDB(key) {
-                try {
-                    const db = await openImgDB();
-                    const tx = db.transaction(IMG_STORE, 'readwrite');
-                    const store = tx.objectStore(IMG_STORE);
-                    store.delete(key);
-                    return new Promise((resolve) => { tx.oncomplete = resolve; });
-                } catch (e) { return null; }
-            }
-
-            async function getUserImages(user, key) {
-                const dbImages = await loadImageFromDB(user.uid + '_' + key);
-                if (dbImages !== null) return dbImages;
-                return user[key] || [];
-            }
-
-            async function setUserImages(user, key, imagesArray) {
-                user[key] = imagesArray;
-                await saveImageToDB(user.uid + '_' + key, imagesArray);
-            }
-
-            async function deleteUserImages(user, key) {
-                delete user[key];
-                await deleteImageFromDB(user.uid + '_' + key);
-            }
-
-            // 初始化
-            loadAllUsers();
-            openImgDB().catch(() => {});
-
-            let currentUser = null;
-            let pendingXlsxRecords = [];
-            let weightPeriod = 'all';
-            let currentFriendUid = null;
-
-            function save() { saveAllUsers(); }
-
-            function generateUID() {
-                let uid;
-                do { uid = Math.floor(100000 + Math.random() * 900000).toString(); } while (allUsers[uid]);
-                return uid;
-            }
-
-            const exerciseLibrary = {
-                '胸部': ['平板卧推', '上斜卧推', '下斜卧推', '哑铃飞鸟', '上斜哑铃飞鸟', '双杠臂屈伸', '绳索夹胸', '蝴蝶机夹胸', '俯卧撑', '器械推胸', '斯万推胸',
-                    '弹力带夹胸'
-                ],
-                '背部': ['引体向上', '杠铃划船', '哑铃划船', '高位下拉', '坐姿划船', 'T杆划船', '直臂下压', '山羊挺身', '硬拉', '单臂哑铃划船', '宽握引体', '绳索面拉'],
-                '腿部': ['深蹲', '硬拉', '腿举', '腿弯举', '负重提踵', '保加利亚分腿蹲', '箭步蹲', '哈克深蹲', '臀桥', '腿屈伸', '站姿提踵', '倒蹬机'],
-                '肩部': ['哑铃推举', '侧平举', '前平举', '面拉', '阿诺德推举', '杠铃推举', '俯身飞鸟', '绳索侧平举', '直立划船', '蝴蝶机反向飞鸟'],
-                '手臂': ['杠铃弯举', '锤式弯举', '三头下压', '窄距卧推', '集中弯举', '牧师椅弯举', '绳索锤式弯举', '双杠臂屈伸（臂）', '仰卧臂屈伸', '腕弯举']
-            };
-
-            function getMonday(dateStr) {
-                const parts = dateStr.split('-');
-                const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-                const dayOfWeek = d.getDay();
-                const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-                d.setDate(d.getDate() + diff);
-                return formatDate(d);
-            }
-
-            function formatDate(date) {
-                const y = date.getFullYear();
-                const m = String(date.getMonth() + 1).padStart(2, '0');
-                const d = String(date.getDate()).padStart(2, '0');
-                return `${y}-${m}-${d}`;
-            }
-
-            function addWeek(monday, weeks) {
-                const parts = monday.split('-');
-                const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-                d.setDate(d.getDate() + weeks * 7);
-                return formatDate(d);
-            }
-
-            function getMonthOffsetDate(dateStr, offset) {
-                const [y, m, d] = dateStr.split('-').map(Number);
-                const dObj = new Date(y, m - 1, d);
-                dObj.setMonth(dObj.getMonth() + offset);
-                return formatDate(dObj);
-            }
-
-            function parseDateToISO(str) {
-                if (!str) return null;
-                let d = new Date(str);
-                if (!isNaN(d.getTime())) return formatDate(d);
-                const parts = String(str).split(/[-/]/);
-                if (parts.length === 3) {
-                    const y = parseInt(parts[0]),
-                        m = parseInt(parts[1]),
-                        day = parseInt(parts[2]);
-                    if (y > 1900 && m >= 1 && m <= 12 && day >= 1 && day <= 31) {
-                        return `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                    }
-                }
-                return null;
-            }
-
-            function escapeHtml(text) {
-                const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-                return String(text).replace(/[&<>"']/g, m => map[m]);
-            }
-
-            function showAuthMsg(text, isError = true) {
-                const el = document.getElementById('authMsg');
-                if (!el) return;
-                el.textContent = text;
-                el.style.color = isError ? '#ff6b6b' : '#2ecc71';
-                setTimeout(() => el.textContent = '', 3000);
-            }
-
-            function showMain() {
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('main-screen').classList.remove('hidden');
-                document.getElementById('myUid').textContent = currentUser.uid;
-                document.getElementById('myName').textContent = currentUser.username;
-                switchPanel('weight');
-                // 检查存储使用情况
-                checkStorageAndWarn();
-            }
-
-            function checkStorageAndWarn() {
-                const usage = getStorageUsage();
-                const limit = 5 * 1024 * 1024; // 5MB 典型限制
-                if (usage > limit * 0.85) {
-                    showToast('⚠️ 存储空间使用 ' + formatBytes(usage) + '，接近上限，建议清理旧图片', 4000);
-                }
-            }
-
-            function switchPanel(name) {
-                ['weight', 'strength', 'onerm', 'physique', 'friends'].forEach(id => {
-                    document.getElementById(id + '-panel').classList.add('hidden');
-                });
-                document.getElementById(name + '-panel').classList.remove('hidden');
-                document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-                const btn = document.querySelector('.nav button[data-panel="' + name + '"]');
-                if (btn) btn.classList.add('active');
-                if (name === 'weight') renderWeightPanel();
-                if (name === 'strength') renderStrengthWeek();
-                if (name === 'physique') renderPhysiquePanel();
-                if (name === 'onerm') { document.getElementById('prMuscleGroup').value = '';
-                    document.getElementById('prExercise').classList.add('hidden');
-                    document.getElementById('addPrExerciseBtn').classList.add('hidden'); }
-                if (name === 'friends') renderFriendList();
-            }
-
-            // 存储信息按钮
-            document.getElementById('storageInfoBtn').addEventListener('click', () => {
-                const usage = getStorageUsage();
-                const usageStr = formatBytes(usage);
-                const limitStr = '约5MB';
-                const pct = Math.min(100, Math.round(usage / (5 * 1024 * 1024) * 100));
-                const barColor = pct < 50 ? '#27ae60' : pct < 80 ? '#f39c12' : '#e74c3c';
-                const msg = `💾 存储使用: ${usageStr} / ${limitStr} (${pct}%)\n` +
-                    `📊 记录数: ${currentUser ? currentUser.weightRecords.length : 0}条体重\n` +
-                    (pct > 80 ? '⚠️ 建议导出数据并清理旧图片' : '✅ 存储空间充足');
-                showToast(msg, 4000);
-            });
-
-            // 本周统计
-            function generateReportContent() {
-                if (!currentUser) return '<p>请先登录</p>';
-                const today = formatDate(new Date());
-                const thisMonday = getMonday(today);
-                const lastMonday = addWeek(thisMonday, -1);
-                const thisPlan = currentUser.weeklyPlans[thisMonday] || { days: {}, weekType: null };
-                const thisWeekType = thisPlan.weekType;
-                let compareMonday = lastMonday;
-                if (thisWeekType) {
-                    const allMondays = Object.keys(currentUser.weeklyPlans).filter(d => d < thisMonday).sort((a, b) => b
-                        .localeCompare(a));
-                    for (let d of allMondays) {
-                        if (currentUser.weeklyPlans[d].weekType === thisWeekType) { compareMonday = d; break; }
-                    }
-                }
-                const comparePlan = currentUser.weeklyPlans[compareMonday] || { days: {} };
-
-                function aggregateExercises(plan) {
-                    const result = {};
-                    for (let i = 0; i < 7; i++) {
-                        const day = plan.days[i] || { muscles: [] };
-                        if (!day.muscles) continue;
-                        day.muscles.forEach(muscle => {
-                            if (!muscle.muscleGroup || muscle.muscleGroup === '休息') return;
-                            if (!result[muscle.muscleGroup]) result[muscle.muscleGroup] = {};
-                            (muscle.exercises || []).forEach(e => {
-                                if (!result[muscle.muscleGroup][e.name]) result[muscle.muscleGroup][e
-                                    .name] = { sets: 0, totalWeight: 0 };
-                                result[muscle.muscleGroup][e.name].sets += e.sets;
-                                result[muscle.muscleGroup][e.name].totalWeight += e.weight * e.sets;
-                            });
-                        });
-                    }
-                    return result;
-                }
-                const thisData = aggregateExercises(thisPlan);
-                const compareData = aggregateExercises(comparePlan);
-                let html = '<h3>📊 本周详细周报</h3>';
-                const thisWeekW = currentUser.weightRecords.filter(r => r.date >= thisMonday);
-                const lastWeekW = currentUser.weightRecords.filter(r => r.date >= lastMonday && r.date < thisMonday);
-                const avgThis = thisWeekW.length ? (thisWeekW.reduce((s, r) => s + r.weight, 0) / thisWeekW.length).toFixed(
-                    1) : null;
-                const avgLast = lastWeekW.length ? (lastWeekW.reduce((s, r) => s + r.weight, 0) / lastWeekW.length).toFixed(
-                    1) : null;
-                html += '<p style="font-size:13px;">体重：本周平均 <b>' + (avgThis || '-') + ' kg</b>';
-                if (avgLast) html += '，上周 ' + avgLast + ' kg';
-                html += '</p>';
-                html += '<h4>💪 训练动作对比</h4>';
-                const allMuscles = new Set([...Object.keys(thisData), ...Object.keys(compareData)]);
-                if (allMuscles.size === 0) {
-                    html += '<p>本周无训练记录</p>';
-                } else {
-                    html +=
-                        '<table class="stats-table"><tr><th>肌群</th><th>动作</th><th>组数</th><th>均重</th><th>组变</th><th>重变</th></tr>';
-                    allMuscles.forEach(mg => {
-                        const thisMuscleData = thisData[mg] || {};
-                        const compareMuscleData = compareData[mg] || {};
-                        const allExercises = new Set([...Object.keys(thisMuscleData), ...Object.keys(
-                            compareMuscleData)]);
-                        html +=
-                            `<tr class="muscle-group-header"><td colspan="6">${escapeHtml(mg)}</td></tr>`;
-                        allExercises.forEach(ex => {
-                            const cur = thisMuscleData[ex] || { sets: 0, totalWeight: 0 };
-                            const prev = compareMuscleData[ex] || { sets: 0, totalWeight: 0 };
-                            const curAvg = cur.sets ? (cur.totalWeight / cur.sets).toFixed(1) : '0';
-                            const prevAvg = prev.sets ? (prev.totalWeight / prev.sets).toFixed(1) :
-                                '0';
-                            let setChange = '-',
-                                weightChange = '-';
-                            if (prev.sets > 0) {
-                                const sp = ((cur.sets - prev.sets) / prev.sets * 100).toFixed(0);
-                                setChange = (sp > 0 ? '+' : '') + sp + '%';
-                                const wp = ((parseFloat(curAvg) - parseFloat(prevAvg)) /
-                                    parseFloat(prevAvg) * 100).toFixed(0);
-                                weightChange = (wp > 0 ? '+' : '') + wp + '%';
-                            } else if (cur.sets > 0) { setChange = '新';
-                                weightChange = '新'; }
-                            html +=
-                                `<tr><td></td><td>${escapeHtml(ex)}</td><td>${cur.sets}</td><td>${curAvg}</td><td>${setChange}</td><td>${weightChange}</td></tr>`;
-                        });
-                    });
-                    html += '</table>';
-                }
-                const typeLabel = thisWeekType ? (thisWeekType === 'strength' ? '增力周' : '容量周') : '上周';
-                html += `<p style="margin-top:8px;font-size:12px;">对比基准：${typeLabel} (${compareMonday})</p>`;
-                return html;
-            }
-
-            function showWeeklyReport() { showModal(generateReportContent()); }
-            document.getElementById('weeklyReportBtn').addEventListener('click', showWeeklyReport);
-            document.getElementById('refreshReportBtn').addEventListener('click', () => {
-                showToast('数据已刷新，打开本周统计将显示最新内容');
-            });
-
-            function showModal(content) {
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                modal.innerHTML = '<div class="modal-content">' + content +
-                    '<button class="small secondary" style="margin-top:10px;width:100%;min-height:44px;">✕ 关闭</button></div>';
-                document.body.appendChild(modal);
-                const closeModal = () => modal.remove();
-                modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-                modal.querySelector('.modal-content button').addEventListener('click', closeModal);
-            }
-
-            // 登录/注册
-            document.getElementById('loginBtn').addEventListener('click', () => {
-                const uname = document.getElementById('username').value.trim();
-                const pwd = document.getElementById('password').value;
-                if (!uname || !pwd) return showAuthMsg('请输入用户名和密码');
-                const user = Object.values(allUsers).find(u => u.username === uname && u.password === pwd);
-                if (!user) return showAuthMsg('用户名或密码错误');
-                currentUser = user;
-                showMain();
-            });
-            document.getElementById('regBtn').addEventListener('click', () => {
-                const uname = document.getElementById('username').value.trim();
-                const pwd = document.getElementById('password').value;
-                if (!uname || !pwd) return showAuthMsg('请输入用户名和密码');
-                if (uname.length < 2) return showAuthMsg('用户名至少2个字符');
-                if (pwd.length < 3) return showAuthMsg('密码至少3位');
-                if (Object.values(allUsers).some(u => u.username === uname)) return showAuthMsg('用户名已存在');
-                const uid = generateUID();
-                allUsers[uid] = { uid, username: uname, password: pwd, weightRecords: [], weeklyPlans: {},
-                    friends: [], customExercises: {} };
-                save();
-                showAuthMsg('✅ 注册成功！UID: ' + uid + '，请登录', false);
-                document.getElementById('username').value = '';
-                document.getElementById('password').value = '';
-            });
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                currentUser = null;
-                localStorage.removeItem('lastLoggedUID_v2');
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('main-screen').classList.add('hidden');
-                document.getElementById('friendData').style.display = 'none';
-                currentFriendUid = null;
-            });
-
-            // 体重面板
-            document.getElementById('manualDateToggle').addEventListener('click', function() {
-                this.classList.toggle('active');
-                const content = this.nextElementSibling;
-                content.style.display = content.style.display === 'block' ? 'none' : 'block';
-            });
-
-            document.getElementById('quickRecordBtn').addEventListener('click', () => {
-                if (!currentUser) return;
-                const weight = parseFloat(document.getElementById('quickWeight').value);
-                if (isNaN(weight) || weight < 20 || weight > 300) return showToast('请输入合理体重(20-300kg)');
-                const phase = document.getElementById('quickPhase').value;
-                const today = formatDate(new Date());
-                const idx = currentUser.weightRecords.findIndex(r => r.date === today);
-                if (idx !== -1) {
-                    currentUser.weightRecords[idx] = { date: today, weight, phase };
-                } else {
-                    currentUser.weightRecords.push({ date: today, weight, phase });
-                }
-                currentUser.weightRecords.sort((a, b) => a.date.localeCompare(b.date));
-                save();
-                document.getElementById('quickWeight').value = '';
-                renderWeightPanel();
-                showToast('✅ 体重已记录');
-            });
-
-            document.getElementById('addWeightBtn').addEventListener('click', () => {
-                if (!currentUser) return;
-                const date = document.getElementById('weightDate').value;
-                const weight = parseFloat(document.getElementById('weightValue').value);
-                if (!date || isNaN(weight) || weight < 20 || weight > 300) return showToast('请填写日期和合理体重');
-                const phase = document.getElementById('weightPhaseSelect').value;
-                const idx = currentUser.weightRecords.findIndex(r => r.date === date);
-                if (idx !== -1) {
-                    currentUser.weightRecords[idx] = { date, weight, phase };
-                } else {
-                    currentUser.weightRecords.push({ date, weight, phase });
-                }
-                currentUser.weightRecords.sort((a, b) => a.date.localeCompare(b.date));
-                save();
-                renderWeightPanel();
-                showToast('✅ 体重记录已添加');
-            });
-
-            document.getElementById('periodDropdown').addEventListener('change', function() {
-                weightPeriod = this.value;
-                renderWeightPanel();
-            });
-
-            function getFilteredByPeriod(period) {
-                if (!currentUser) return [];
-                const records = [...currentUser.weightRecords].sort((a, b) => a.date.localeCompare(b.date));
-                if (period === 'all') return records;
-                const now = new Date();
-                const today = formatDate(now);
-                let start, end;
-                switch (period) {
-                    case '7d':
-                        start = formatDate(new Date(Date.now() - 7 * 86400000));
-                        end = today;
-                        break;
-                    case '14d':
-                        start = formatDate(new Date(Date.now() - 14 * 86400000));
-                        end = today;
-                        break;
-                    case '30d':
-                        start = formatDate(new Date(Date.now() - 30 * 86400000));
-                        end = today;
-                        break;
-                    case '60d':
-                        start = formatDate(new Date(Date.now() - 60 * 86400000));
-                        end = today;
-                        break;
-                    case '90d':
-                        start = formatDate(new Date(Date.now() - 90 * 86400000));
-                        end = today;
-                        break;
-                    case 'this_month':
-                        start = formatDate(new Date(now.getFullYear(), now.getMonth(), 1));
-                        end = today;
-                        break;
-                    case 'last_month': {
-                        const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                        const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
-                        return records.filter(r => r.date >= formatDate(firstDay) && r.date <= formatDate(lastDay));
-                    }
-                    case 'this_year':
-                        start = formatDate(new Date(now.getFullYear(), 0, 1));
-                        end = today;
-                        break;
-                    case 'last_year': {
-                        const y = now.getFullYear() - 1;
-                        return records.filter(r => r.date >= formatDate(new Date(y, 0, 1)) && r.date <= formatDate(
-                            new Date(y, 11, 31)));
-                    }
-                    default:
-                        return records;
-                }
-                return records.filter(r => r.date >= start && r.date <= end);
-            }
-
-            function renderWeightPanel() {
-                const records = getFilteredByPeriod(weightPeriod);
-                drawWeightChart(records);
-                updateSuggestion(records);
-            }
-
-            function drawWeightChart(records) {
-                const container = document.getElementById('weightChartDiv');
-                if (!container) return;
-                if (records.length === 0) {
-                    container.innerHTML =
-                        '<div style="text-align:center;padding:40px 20px;color:#aaa;">暂无体重数据<br><small>请记录体重或导入Excel</small></div>';
-                    return;
-                }
-                const dates = records.map(r => r.date);
-                const weights = records.map(r => r.weight);
-                const phases = records.map(r => r.phase);
-                const trace = {
-                    x: dates,
-                    y: weights,
-                    type: 'scatter',
-                    mode: 'lines+markers',
-                    marker: {
-                        color: phases.map(p => p === 'bulk' ? '#27ae60' : '#e74c3c'),
-                        size: Math.max(5, Math.min(10, 40 / Math.sqrt(records.length))),
-                        line: { width: 1, color: '#fff' }
-                    },
-                    line: { color: '#ff6b6b', width: 2.5, shape: 'spline' },
-                    hovertemplate: '日期: %{x}<br>体重: %{y} kg<extra></extra>',
-                };
-                const periodText = document.getElementById('periodDropdown').selectedOptions[0]?.text || '全部';
-                const layout = {
-                    title: { text: `体重变化 (${periodText})`, font: { size: 14, color: '#eee' } },
-                    paper_bgcolor: 'rgba(0,0,0,0)',
-                    plot_bgcolor: 'rgba(31,43,77,0.6)',
-                    font: { color: '#ccc', size: 10 },
-                    xaxis: { title: '', tickformat: '%m-%d', gridcolor: '#444', tickangle: -30, tickfont: { size: 9 },
-                        nticks: Math.min(records.length, 15) },
-                    yaxis: { title: '体重(kg)', gridcolor: '#444', tickfont: { size: 10 } },
-                    margin: { l: 42, r: 12, t: 38, b: 55 },
-                    hovermode: 'closest',
-                    dragmode: false,
-                };
-                Plotly.newPlot(container, [trace], layout, { displayModeBar: false, responsive: true, scrollZoom: false });
-            }
-
-            function updateSuggestion(records) {
-                const el = document.getElementById('weightSuggestion');
-                if (!el) return;
-                if (records.length < 2) { el.textContent = '📝 数据不足，建议至少记录2条体重数据'; return; }
-                const first = records[0],
-                    last = records[records.length - 1];
-                const totalChange = last.weight - first.weight;
-                const days = Math.max(1, Math.round((new Date(last.date) - new Date(first.date)) / 86400000));
-                const weeklyRate = (totalChange / (days / 7)).toFixed(2);
-                const lastPhase = last.phase;
-                let sug = '';
-                if (lastPhase === 'bulk') {
-                    sug = parseFloat(weeklyRate) < 0.15 ? '增肌偏慢，可适当增加热量摄入' :
-                        parseFloat(weeklyRate) > 0.6 ? '增重较快，注意控制体脂' : '增肌趋势良好，继续保持';
-                } else {
-                    sug = parseFloat(weeklyRate) > -0.15 ? '减脂较慢，可调整饮食或增加有氧' :
-                        parseFloat(weeklyRate) < -0.8 ? '减重过快，注意保留肌肉' : '减脂速率正常，保持节奏';
-                }
-                el.textContent =
-                    `📊 ${records.length}条记录 | 趋势${totalChange>0?'+':''}${totalChange.toFixed(1)}kg | ${sug} (周均${weeklyRate>0?'+':''}${weeklyRate}kg)`;
-            }
-
-            // Excel
-            document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
-                if (typeof XLSX === 'undefined') return showToast('需要加载SheetJS库，请检查网络');
-                const ws_data = [
-                    ['日期', '体重', '增肌期/减脂期'],
-                    ['2025-01-01', 70.0, '增肌期']
-                ];
-                const ws = XLSX.utils.aoa_to_sheet(ws_data);
-                ws['!cols'] = [{ wch: 14 }, { wch: 8 }, { wch: 14 }];
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "体重记录");
-                XLSX.writeFile(wb, "体重记录模板.xlsx");
-                showToast('模板已下载');
-            });
-            document.getElementById('xlsxUpload').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                if (typeof XLSX === 'undefined') return showToast('需要加载SheetJS库');
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    try {
-                        const data = new Uint8Array(ev.target.result);
-                        const wb = XLSX.read(data, { type: 'array' });
-                        const ws = wb.Sheets[wb.SheetNames[0]];
-                        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false });
-                        if (rows.length < 2) return showToast('至少需要表头和一行数据');
-                        const headers = rows[0].map(h => String(h).trim());
-                        const dateIdx = headers.indexOf('日期'),
-                            weightIdx = headers.indexOf('体重'),
-                            phaseIdx = headers.indexOf('增肌期/减脂期');
-                        if (dateIdx === -1 || weightIdx === -1) return showToast('表头需要"日期"和"体重"列');
-                        pendingXlsxRecords = [];
-                        for (let i = 1; i < rows.length; i++) {
-                            const r = rows[i];
-                            let date = parseDateToISO(r[dateIdx]);
-                            if (!date) continue;
-                            const weight = parseFloat(r[weightIdx]);
-                            if (isNaN(weight)) continue;
-                            const phaseRaw = String(r[phaseIdx] || '').trim();
-                            pendingXlsxRecords.push({ date, weight, phase: phaseRaw === '增肌期' ? 'bulk' : 'cut' });
-                        }
-                        document.getElementById('mapXlsxBtn').disabled = false;
-                        showToast(`📋 读取 ${pendingXlsxRecords.length} 条，点击"映射替换"导入`);
-                    } catch (err) {
-                        showToast('Excel解析失败，请检查格式');
-                    }
-                };
-                reader.readAsArrayBuffer(file);
-                e.target.value = '';
-            });
-            document.getElementById('mapXlsxBtn').addEventListener('click', () => {
-                if (!currentUser || pendingXlsxRecords.length === 0) return;
-                if (!confirm(`将用${pendingXlsxRecords.length}条数据替换全部体重记录，确认？`)) return;
-                currentUser.weightRecords = pendingXlsxRecords;
-                currentUser.weightRecords.sort((a, b) => a.date.localeCompare(b.date));
-                save();
-                pendingXlsxRecords = [];
-                document.getElementById('mapXlsxBtn').disabled = true;
-                weightPeriod = 'all';
-                document.getElementById('periodDropdown').value = 'all';
-                renderWeightPanel();
-                showToast('✅ 体重数据已全部替换');
-            });
-
-            // 力量面板
-            let currentStrengthMonday = getMonday(formatDate(new Date()));
-
-            function setStrengthMonday(dateStr) { currentStrengthMonday = dateStr;
-                renderStrengthWeek(); }
-            document.getElementById('prevWeekBtn').addEventListener('click', () => setStrengthMonday(addWeek(
-                currentStrengthMonday, -1)));
-            document.getElementById('nextWeekBtn').addEventListener('click', () => setStrengthMonday(addWeek(
-                currentStrengthMonday, 1)));
-            document.getElementById('todayStrengthBtn').addEventListener('click', () => setStrengthMonday(getMonday(formatDate(
-                new Date()))));
-
-            function getPlan(weekMonday) {
-                if (!currentUser.weeklyPlans[weekMonday]) currentUser.weeklyPlans[weekMonday] = { days: {}, weekType: null };
-                return currentUser.weeklyPlans[weekMonday];
-            }
-
-            function updateWeekTypeButtons() {
-                const plan = getPlan(currentStrengthMonday);
-                document.getElementById('strengthWeekBtn').classList.toggle('active', plan.weekType === 'strength');
-                document.getElementById('volumeWeekBtn').classList.toggle('active', plan.weekType === 'volume');
-            }
-            document.getElementById('strengthWeekBtn').addEventListener('click', () => {
-                const plan = getPlan(currentStrengthMonday);
-                plan.weekType = plan.weekType === 'strength' ? null : 'strength';
-                if (plan.weekType === 'strength') plan.weekType = 'strength';
-                save();
-                updateWeekTypeButtons();
-                showToast(plan.weekType === 'strength' ? '🔥 已标记为增力周' : '已取消标记');
-            });
-            document.getElementById('volumeWeekBtn').addEventListener('click', () => {
-                const plan = getPlan(currentStrengthMonday);
-                plan.weekType = plan.weekType === 'volume' ? null : 'volume';
-                if (plan.weekType === 'volume') plan.weekType = 'volume';
-                save();
-                updateWeekTypeButtons();
-                showToast(plan.weekType === 'volume' ? '💧 已标记为容量周' : '已取消标记');
-            });
-
-            function renderStrengthWeek() {
-                document.getElementById('currentWeekLabel').textContent = currentStrengthMonday + ' 周';
-                updateWeekTypeButtons();
-                const plan = getPlan(currentStrengthMonday);
-                const grid = document.getElementById('weekGrid');
-                grid.innerHTML = '';
-                const today = formatDate(new Date());
-                const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
-                for (let i = 0; i < 7; i++) {
-                    const d = new Date(currentStrengthMonday + 'T00:00:00');
-                    d.setDate(d.getDate() + i);
-                    const dateStr = formatDate(d);
-                    const dayData = plan.days[i] || { muscles: [] };
-                    const muscleNames = (dayData.muscles || []).length > 0 ?
-                        (dayData.muscles.map(m => m.muscleGroup).filter(Boolean).join(',') || '休息') :
-                        '休息';
-                    const cell = document.createElement('div');
-                    cell.className = 'day-cell';
-                    if (dateStr === today) cell.classList.add('today');
-                    if ((dayData.muscles || []).length > 0 && dayData.muscles.some(m => m.muscleGroup && m
-                            .muscleGroup !== '休息')) {
-                        cell.classList.add('has-data');
-                    }
-                    cell.innerHTML =
-                        `<strong>周${dayNames[i]}</strong><br><span style="font-size:9px;">${dateStr.slice(5)}</span><br><span style="font-size:10px;">${muscleNames}</span>`;
-                    cell.addEventListener('click', () => showDayDetail(i));
-                    grid.appendChild(cell);
-                }
-            }
-
-            function showDayDetail(dayIdx) {
-                const plan = getPlan(currentStrengthMonday);
-                if (!plan.days[dayIdx]) plan.days[dayIdx] = { muscles: [] };
-                const day = plan.days[dayIdx];
-                if (!day.muscles) day.muscles = [];
-                const container = document.getElementById('dayDetail');
-                let html = '<h4 style="margin-bottom:8px;">' + ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][dayIdx] +
-                    '</h4>';
-                day.muscles.forEach((muscle, mIdx) => {
-                    html += renderMuscleBlock(muscle, mIdx);
-                });
-                html +=
-                    `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
-                    <button id="addMuscleBtn" class="small secondary" style="flex:1;min-width:90px;">+ 添加肌群</button>
-                    <button id="restDayBtn" class="small secondary" style="flex:1;min-width:70px;">🛌 休息日</button>
-                </div>`;
-                container.innerHTML = html;
-                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-                document.querySelectorAll('.remove-muscle-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const idx = parseInt(this.dataset.midx);
-                        day.muscles.splice(idx, 1);
-                        save();
-                        renderStrengthWeek();
-                        showDayDetail(dayIdx);
-                    });
-                });
-                document.getElementById('addMuscleBtn').addEventListener('click', () => {
-                    day.muscles.push({ muscleGroup: '', exercises: [] });
-                    save();
-                    renderStrengthWeek();
-                    showDayDetail(dayIdx);
-                });
-                document.getElementById('restDayBtn').addEventListener('click', () => {
-                    day.muscles = [];
-                    save();
-                    renderStrengthWeek();
-                    showDayDetail(dayIdx);
-                    showToast('已设为休息日');
-                });
-                day.muscles.forEach((muscle, mIdx) => {
-                    const groupSel = document.getElementById(`groupSel-${mIdx}`);
-                    if (groupSel) {
-                        groupSel.value = muscle.muscleGroup || '';
-                        groupSel.addEventListener('change', function() {
-                            muscle.muscleGroup = this.value;
-                            save();
-                            renderStrengthWeek();
-                            showDayDetail(dayIdx);
-                        });
-                    }
-                    const exerciseArea = document.getElementById(`exerciseArea-${mIdx}`);
-                    if (exerciseArea) {
-                        function renderExercises() {
-                            let exHtml = '';
-                            if (muscle.muscleGroup && muscle.muscleGroup !== '休息') {
-                                const baseExs = exerciseLibrary[muscle.muscleGroup] || [];
-                                const customExs = (currentUser.customExercises && currentUser
-                                    .customExercises[muscle.muscleGroup]) ? currentUser.customExercises[
-                                        muscle.muscleGroup
-                                    ] : [];
-                                const allExs = [...new Set([...baseExs, ...customExs])];
-                                exHtml +=
-                                    `<div class="ex-list-container"><table class="ex-table"><thead><tr><th>动作</th><th>重量</th><th>次数</th><th>组数</th><th></th></tr></thead><tbody>`;
-                                (muscle.exercises || []).forEach((e, eIdx) => {
-                                    exHtml +=
-                                        `<tr>
-                                        <td>${escapeHtml(e.name)}</td>
-                                        <td>${e.weight}</td><td>${e.reps}</td><td>${e.sets}</td>
-                                        <td style="display:flex;gap:2px;justify-content:center;">
-                                            <button class="small modEx" data-midx="${mIdx}" data-eidx="${eIdx}" style="padding:2px 5px;font-size:10px;min-height:26px;">改</button>
-                                            <button class="small delEx" data-midx="${mIdx}" data-eidx="${eIdx}" style="padding:2px 5px;font-size:10px;min-height:26px;">删</button>
-                                        </td>
-                                    </tr>`;
-                                });
-                                exHtml += `</tbody></table></div>`;
-                                exHtml +=
-                                    `<div style="display:flex;gap:4px;margin:4px 0;">
-                                        <select id="exSel-${mIdx}" style="flex:1;font-size:12px;min-height:34px;"><option value="">选择动作</option>`;
-                                allExs.forEach(ex => exHtml += '<option>' + escapeHtml(ex) +
-                                    '</option>');
-                                exHtml +=
-                                    `</select>
-                                        <button class="small add-custom-btn" data-midx="${mIdx}" style="min-width:30px;min-height:34px;">+</button>
-                                    </div>`;
-                                exHtml +=
-                                    `<div style="display:flex;gap:3px;flex-wrap:wrap;">
-                                        <input id="wtDet-${mIdx}" placeholder="重量" type="number" step="0.5" style="flex:1;min-width:55px;font-size:12px;min-height:34px;" inputmode="decimal">
-                                        <input id="repDet-${mIdx}" placeholder="次数" type="number" style="flex:1;min-width:45px;font-size:12px;min-height:34px;" inputmode="numeric">
-                                        <input id="setDet-${mIdx}" placeholder="组数" type="number" style="flex:1;min-width:45px;font-size:12px;min-height:34px;" inputmode="numeric">
-                                    </div>`;
-                                exHtml +=
-                                    `<button class="small add-ex-btn" data-midx="${mIdx}" style="margin-top:3px;">添加动作</button>`;
-                            }
-                            exerciseArea.innerHTML = exHtml;
-                            if (!muscle.muscleGroup || muscle.muscleGroup === '休息') return;
-                            const addCustomBtn = document.querySelector(`.add-custom-btn[data-midx="${mIdx}"]`);
-                            if (addCustomBtn) {
-                                addCustomBtn.addEventListener('click', () => {
-                                    const newName = prompt('输入新动作名称：');
-                                    if (newName && newName.trim()) {
-                                        if (!currentUser.customExercises) currentUser
-                                            .customExercises = {};
-                                        if (!currentUser.customExercises[muscle.muscleGroup])
-                                            currentUser.customExercises[muscle.muscleGroup] = [];
-                                        if (!currentUser.customExercises[muscle.muscleGroup]
-                                            .includes(newName.trim())) {
-                                            currentUser.customExercises[muscle.muscleGroup].push(
-                                                newName.trim());
-                                            save();
-                                            showToast('动作添加成功');
-                                            renderExercises();
-                                        }
-                                    }
-                                });
-                            }
-                            const addExBtn = document.querySelector(`.add-ex-btn[data-midx="${mIdx}"]`);
-                            if (addExBtn) {
-                                addExBtn.addEventListener('click', () => {
-                                    const exSel = document.getElementById(`exSel-${mIdx}`);
-                                    const wtDet = document.getElementById(`wtDet-${mIdx}`);
-                                    const repDet = document.getElementById(`repDet-${mIdx}`);
-                                    const setDet = document.getElementById(`setDet-${mIdx}`);
-                                    if (!exSel || !wtDet || !repDet || !setDet) return;
-                                    const name = exSel.value;
-                                    const w = parseFloat(wtDet.value);
-                                    const r = parseInt(repDet.value);
-                                    const s = parseInt(setDet.value);
-                                    if (!name || isNaN(w) || isNaN(r) || isNaN(s)) return showToast(
-                                        '请完整填写动作信息');
-                                    if (!muscle.exercises) muscle.exercises = [];
-                                    muscle.exercises.push({ name, weight: w, reps: r, sets: s });
-                                    save();
-                                    renderExercises();
-                                    showToast('动作已添加');
-                                });
-                            }
-                            document.querySelectorAll(`.modEx[data-midx="${mIdx}"]`).forEach(btn => {
-                                btn.addEventListener('click', function() {
-                                    const eIdx = parseInt(this.dataset.eidx);
-                                    const ex = muscle.exercises[eIdx];
-                                    const newWeight = prompt('新重量(kg)', ex.weight);
-                                    const newReps = prompt('新次数', ex.reps);
-                                    const newSets = prompt('新组数', ex.sets);
-                                    if (newWeight && !isNaN(parseFloat(newWeight)) && newReps && !
-                                        isNaN(parseInt(newReps)) && newSets && !isNaN(parseInt(
-                                            newSets))) {
-                                        ex.weight = parseFloat(newWeight);
-                                        ex.reps = parseInt(newReps);
-                                        ex.sets = parseInt(newSets);
-                                        save();
-                                        renderExercises();
-                                    } else {
-                                        showToast('输入无效');
-                                    }
-                                });
-                            });
-                            document.querySelectorAll(`.delEx[data-midx="${mIdx}"]`).forEach(btn => {
-                                btn.addEventListener('click', function() {
-                                    const eIdx = parseInt(this.dataset.eidx);
-                                    muscle.exercises.splice(eIdx, 1);
-                                    save();
-                                    renderExercises();
-                                });
-                            });
-                        }
-                        renderExercises();
-                    }
-                });
-            }
-
-            function renderMuscleBlock(muscle, idx) {
-                return `
-                    <div class="muscle-block" id="muscle-block-${idx}">
-                        <div style="display:flex;justify-content:space-between;align-items:center;gap:5px;">
-                            <select id="groupSel-${idx}" style="flex:1;margin:0;min-height:38px;">
-                                <option value="">选择肌群</option>
-                                <option value="胸部">胸部</option><option value="背部">背部</option>
-                                <option value="腿部">腿部</option><option value="肩部">肩部</option><option value="手臂">手臂</option>
-                            </select>
-                            <button class="small remove-muscle-btn" data-midx="${idx}" style="margin:0;min-height:38px;">删除</button>
-                        </div>
-                        <div id="exerciseArea-${idx}" style="margin-top:6px;"></div>
-                    </div>`;
-            }
-
-            // 1PR面板
-            const prFormulas = {
-                epley: (w, r) => w * (1 + r / 30),
-                brzycki: (w, r) => w * (36 / (37 - r)),
-                lombardi: (w, r) => w * Math.pow(r, 0.1),
-                mayhew: (w, r) => 100 * w / (101.3 - 2.67123 * r),
-                lander: (w, r) => 100 * w / (101.3 - 2.67123 * r)
-            };
-            const formulaNames = { epley: 'Epley', brzycki: 'Brzycki', lombardi: 'Lombardi', mayhew: 'Mayhew',
-                lander: 'Lander' };
-
-            document.getElementById('prMuscleGroup').addEventListener('change', function() {
-                const mg = this.value;
-                const sel = document.getElementById('prExercise');
-                const addBtn = document.getElementById('addPrExerciseBtn');
-                if (!mg) { sel.classList.add('hidden');
-                    addBtn.classList.add('hidden'); return; }
-                sel.classList.remove('hidden');
-                addBtn.classList.remove('hidden');
-                updatePrExerciseList(mg);
-            });
-
-            function updatePrExerciseList(mg) {
-                const sel = document.getElementById('prExercise');
-                const base = exerciseLibrary[mg] || [];
-                const custom = (currentUser.customExercises && currentUser.customExercises[mg]) ? currentUser
-                    .customExercises[mg] : [];
-                const all = [...new Set([...base, ...custom])];
-                sel.innerHTML = '<option value="">选择动作</option>' + all.map(e => '<option>' + e + '</option>').join('');
-            }
-            document.getElementById('addPrExerciseBtn').addEventListener('click', () => {
-                const mg = document.getElementById('prMuscleGroup').value;
-                if (!mg) return;
-                const newName = prompt('输入新动作名称：');
-                if (newName && newName.trim()) {
-                    if (!currentUser.customExercises) currentUser.customExercises = {};
-                    if (!currentUser.customExercises[mg]) currentUser.customExercises[mg] = [];
-                    if (!currentUser.customExercises[mg].includes(newName.trim())) {
-                        currentUser.customExercises[mg].push(newName.trim());
-                        save();
-                        showToast('动作添加成功');
-                        updatePrExerciseList(mg);
-                    }
-                }
-            });
-            document.getElementById('calc1RM').addEventListener('click', () => {
-                const w = parseFloat(document.getElementById('weightInput').value);
-                const r = parseInt(document.getElementById('repsInput').value);
-                if (isNaN(w) || isNaN(r) || r < 1 || r > 30) return showToast('请输入有效值(次数1-30)');
-                const formula = document.getElementById('prFormula').value;
-                const rm = prFormulas[formula](w, r).toFixed(1);
-                document.getElementById('rmResult').textContent = '💥 ' + rm + ' kg';
-                document.getElementById('formulaUsed').textContent = '公式: ' + formulaNames[formula];
-            });
-
-            // 形体面板
-            let currentPhysiqueMonday = getMonday(formatDate(new Date()));
-
-            function setPhysiqueMonday(dateStr) { currentPhysiqueMonday = dateStr;
-                renderPhysiquePanel(); }
-            document.getElementById('physiquePrevWeek').addEventListener('click', () => setPhysiqueMonday(addWeek(
-                currentPhysiqueMonday, -1)));
-            document.getElementById('physiqueNextWeek').addEventListener('click', () => setPhysiqueMonday(addWeek(
-                currentPhysiqueMonday, 1)));
-            document.getElementById('todayPhysiqueBtn').addEventListener('click', () => setPhysiqueMonday(getMonday(formatDate(
-                new Date()))));
-
-            async function renderPhysiquePanel() {
-                document.getElementById('physiqueWeekLabel').textContent = currentPhysiqueMonday + ' 周';
-                const grid = document.getElementById('physiqueWeekGrid');
-                grid.innerHTML = '';
-                const today = formatDate(new Date());
-                const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
-                for (let i = 0; i < 7; i++) {
-                    const d = new Date(currentPhysiqueMonday + 'T00:00:00');
-                    d.setDate(d.getDate() + i);
-                    const dateStr = formatDate(d);
-                    const key = 'physique_' + dateStr;
-                    const images = await getUserImages(currentUser, key);
-                    const lastMonthDate = getMonthOffsetDate(dateStr, -1);
-                    const threeMonthsAgoDate = getMonthOffsetDate(dateStr, -3);
-                    const lastMonthImages = await getUserImages(currentUser, 'physique_' + lastMonthDate);
-                    const threeMonthsAgoImages = await getUserImages(currentUser, 'physique_' + threeMonthsAgoDate);
-                    const cell = document.createElement('div');
-                    cell.className = 'day-cell';
-                    if (dateStr === today) cell.classList.add('today');
-                    if (images.length > 0) cell.classList.add('has-data');
-                    cell.style.minHeight = '105px';
-                    cell.style.fontSize = '9px';
-                    let html = `<strong>周${dayNames[i]}</strong><br><span style="font-size:8px;">${dateStr.slice(5)}</span><br>`;
-                    if (images.length > 0) {
-                        html +=
-                            `<img src="${images[0]}" class="img-thumb-small" style="width:24px;height:24px;border-radius:4px;"> `;
-                    } else {
-                        html += `<span style="color:#555;">-</span> `;
-                    }
-                    html +=
-                    `<button class="small" style="padding:1px 4px;font-size:8px;min-height:20px;">📷</button><br>`;
-                    html +=
-                        `<div class="physique-row"><span class="physique-label">上月</span>`;
-                    if (lastMonthImages.length > 0) {
-                        html +=
-                            `<img src="${lastMonthImages[0]}" class="img-thumb-small" data-date="${lastMonthDate}" style="width:16px;height:16px;">`;
-                    } else { html += `<span style="color:#555;">无</span>`; }
-                    html += `</div><div class="physique-row"><span class="physique-label">3月前</span>`;
-                    if (threeMonthsAgoImages.length > 0) {
-                        html +=
-                            `<img src="${threeMonthsAgoImages[0]}" class="img-thumb-small" data-date="${threeMonthsAgoDate}" style="width:16px;height:16px;">`;
-                    } else { html += `<span style="color:#555;">无</span>`; }
-                    html += `</div>`;
-                    cell.innerHTML = html;
-                    cell.querySelector('button').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        document.getElementById('physiqueTargetDate').value = dateStr;
-                        document.getElementById('physiqueImageUpload').click();
-                    });
-                    if (images.length > 0) {
-                        const mainImg = cell.querySelector(`img[src="${images[0]}"]`);
-                        if (mainImg) {
-                            mainImg.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                showPhysiqueViewer(dateStr, images, 0);
-                            });
-                        }
-                    }
-                    cell.querySelectorAll('.img-thumb-small[data-date]').forEach(img => {
-                        img.addEventListener('click', async (e) => {
-                            e.stopPropagation();
-                            const targetDate = e.target.dataset.date;
-                            const targetImages = await getUserImages(currentUser,
-                                'physique_' + targetDate);
-                            if (targetImages.length > 0) {
-                                showPhysiqueViewer(targetDate, targetImages, 0);
-                            }
-                        });
-                    });
-                    grid.appendChild(cell);
-                }
-            }
-
-            document.getElementById('physiqueImageUpload').addEventListener('change', async function(e) {
-                const files = Array.from(e.target.files);
-                if (files.length === 0) return;
-                const dateStr = document.getElementById('physiqueTargetDate').value;
-                if (!dateStr) return;
-                const statusEl = document.getElementById('physiqueUploadStatus');
-                statusEl.textContent = '正在压缩...';
-                const key = 'physique_' + dateStr;
-                const existingImages = await getUserImages(currentUser, key);
-                const promises = files.map(file => {
-                    return new Promise((resolve, reject) => {
-                        if (file.size > 15 * 1024 * 1024) { reject(new Error(
-                                `图片超过15MB`)); return; }
-                        const reader = new FileReader();
-                        reader.onload = function(ev) {
-                            const img = new Image();
-                            img.onload = function() {
-                                const maxW = 600;
-                                if (img.width > maxW) {
-                                    const canvas = document.createElement('canvas');
-                                    const ratio = maxW / img.width;
-                                    canvas.width = maxW;
-                                    canvas.height = Math.round(img.height * ratio);
-                                    const ctx = canvas.getContext('2d');
-                                    ctx.drawImage(img, 0, 0, canvas.width, canvas
-                                        .height);
-                                    resolve(canvas.toDataURL('image/jpeg', 0.65));
-                                } else {
-                                    resolve(ev.target.result);
-                                }
-                            };
-                            img.onerror = () => resolve(ev.target.result);
-                            img.src = ev.target.result;
-                        };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(file);
-                    });
-                });
-                try {
-                    const results = await Promise.all(promises);
-                    const allImages = [...existingImages, ...results];
-                    await setUserImages(currentUser, key, allImages);
-                    save();
-                    renderPhysiquePanel();
-                    statusEl.textContent = '✅ 上传完成';
-                    setTimeout(() => statusEl.textContent = '', 1500);
-                } catch (err) {
-                    showToast('上传失败: ' + err.message);
-                    statusEl.textContent = '上传部分失败';
-                }
-                e.target.value = '';
-            });
-
-            function showPhysiqueViewer(dateStr, images, startIndex) {
-                let currentIdx = startIndex;
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                const content = `
-                    <div class="modal-content" style="text-align:center;">
-                        <p style="font-size:12px;color:#aaa;">${dateStr}</p>
-                        <div class="image-viewer">
-                            <img src="${images[currentIdx]}" id="viewerImage" style="width:100%;border-radius:10px;">
-                            <div class="image-nav">
-                                <button id="prevImgBtn" ${currentIdx===0?'disabled':''}>◀ 上一张</button>
-                                <span style="font-size:13px;">${currentIdx+1}/${images.length}</span>
-                                <button id="nextImgBtn" ${currentIdx===images.length-1?'disabled':''}>下一张 ▶</button>
-                            </div>
-                            <div style="display:flex;justify-content:center;gap:6px;margin-top:8px;flex-wrap:wrap;">
-                                <button id="replaceImgBtn" class="small">替换</button>
-                                <button id="deleteImgBtn" class="small">删除</button>
-                                <button id="closeViewerBtn" class="small secondary">关闭</button>
-                            </div>
-                            <input type="file" id="replaceFileInput" accept="image/*" capture="environment" style="display:none;">
-                        </div>
-                    </div>`;
-                modal.innerHTML = content;
-                document.body.appendChild(modal);
-                const closeModal = () => modal.remove();
-                modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-                document.getElementById('closeViewerBtn').addEventListener('click', closeModal);
-                const updateView = async () => {
-                    const arr = await getUserImages(currentUser, 'physique_' + dateStr);
-                    const imgEl = document.getElementById('viewerImage');
-                    if (imgEl && arr[currentIdx]) imgEl.src = arr[currentIdx];
-                    const prevBtn = document.getElementById('prevImgBtn');
-                    const nextBtn = document.getElementById('nextImgBtn');
-                    if (prevBtn) prevBtn.disabled = currentIdx === 0;
-                    if (nextBtn) nextBtn.disabled = currentIdx >= arr.length - 1;
-                    const span = document.querySelector('.image-nav span');
-                    if (span) span.textContent = `${currentIdx+1}/${arr.length}`;
-                };
-                document.getElementById('prevImgBtn').addEventListener('click', () => {
-                    if (currentIdx > 0) { currentIdx--;
-                        updateView(); }
-                });
-                document.getElementById('nextImgBtn').addEventListener('click', () => {
-                    if (currentIdx < images.length - 1) { currentIdx++;
-                        updateView(); }
-                });
-                document.getElementById('replaceImgBtn').addEventListener('click', () => {
-                    document.getElementById('replaceFileInput').click();
-                });
-                document.getElementById('replaceFileInput').addEventListener('change', async function(e) {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    if (file.size > 15 * 1024 * 1024) return showToast('图片不超过15MB');
-                    const reader = new FileReader();
-                    reader.onload = async function(ev) {
-                        const img = new Image();
-                        img.onload = async function() {
-                            let result = ev.target.result;
-                            if (img.width > 600) {
-                                const canvas = document.createElement('canvas');
-                                const ratio = 600 / img.width;
-                                canvas.width = 600;
-                                canvas.height = Math.round(img.height * ratio);
-                                const ctx = canvas.getContext('2d');
-                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                                result = canvas.toDataURL('image/jpeg', 0.65);
-                            }
-                            const arr = await getUserImages(currentUser, 'physique_' + dateStr);
-                            arr[currentIdx] = result;
-                            await setUserImages(currentUser, 'physique_' + dateStr, arr);
-                            save();
-                            updateView();
-                            showToast('图片已替换');
-                        };
-                        img.onerror = async function() {
-                            const arr = await getUserImages(currentUser, 'physique_' + dateStr);
-                            arr[currentIdx] = ev.target.result;
-                            await setUserImages(currentUser, 'physique_' + dateStr, arr);
-                            save();
-                            updateView();
-                            showToast('图片已替换');
-                        };
-                        img.src = ev.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                });
-                document.getElementById('deleteImgBtn').addEventListener('click', async () => {
-                    const arr = await getUserImages(currentUser, 'physique_' + dateStr);
-                    arr.splice(currentIdx, 1);
-                    if (arr.length === 0) {
-                        await deleteUserImages(currentUser, 'physique_' + dateStr);
-                    } else {
-                        await setUserImages(currentUser, 'physique_' + dateStr, arr);
-                    }
-                    save();
-                    showToast('图片已删除');
-                    const updatedArr = await getUserImages(currentUser, 'physique_' + dateStr);
-                    if (updatedArr.length > 0) {
-                        if (currentIdx >= updatedArr.length) currentIdx = updatedArr.length - 1;
-                        updateView();
-                    } else { closeModal();
-                        renderPhysiquePanel(); }
-                });
-            }
-
-            // 朋友面板
-            function renderFriendList() {
-                const listDiv = document.getElementById('friendList');
-                if (!currentUser || !currentUser.friends.length) {
-                    listDiv.innerHTML = '<p style="text-align:center;color:#888;">暂无好友，输入UID添加</p>';
-                    document.getElementById('friendData').style.display = 'none';
-                    return;
-                }
-                let html = '<h4>已添加好友</h4>';
-                currentUser.friends.forEach(uid => {
-                    const user = allUsers[uid];
-                    const name = user ? escapeHtml(user.username) : '未知用户';
-                    html += `<div class="friend-list-item">
-                        <span>${name} <small style="color:#888;">(${uid})</small></span>
-                        <div style="display:flex;gap:4px;">
-                            <button class="small viewFriendBtn" data-uid="${uid}">查看</button>
-                            <button class="small hideFriendBtn">隐藏</button>
-                        </div>
-                    </div>`;
-                });
-                listDiv.innerHTML = html;
-                document.querySelectorAll('.viewFriendBtn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        currentFriendUid = this.dataset.uid;
-                        displayFriendReport(currentFriendUid);
-                    });
-                });
-                document.querySelectorAll('.hideFriendBtn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        document.getElementById('friendData').style.display = 'none';
-                    });
-                });
-                if (currentFriendUid && currentUser.friends.includes(currentFriendUid)) {
-                    displayFriendReport(currentFriendUid);
-                }
-            }
-
-            document.getElementById('exportMyDataBtn').addEventListener('click', () => {
-                if (!currentUser) return;
-                const exportData = JSON.stringify(currentUser);
-                const encoded = btoa(unescape(encodeURIComponent(exportData)));
-                navigator.clipboard.writeText(encoded).then(() => {
-                    showToast('✅ 数据已复制到剪贴板，发送给好友即可');
-                }).catch(() => {
-                    const ta = document.createElement('textarea');
-                    ta.value = encoded;
-                    ta.style.cssText = 'position:fixed;left:-9999px;';
-                    document.body.appendChild(ta);
-                    ta.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(ta);
-                    showToast('✅ 数据已复制到剪贴板');
-                });
-            });
-
-            document.getElementById('exportMyDataFileBtn').addEventListener('click', () => {
-                if (!currentUser) return;
-                const exportData = JSON.stringify(currentUser);
-                const blob = new Blob([exportData], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `solo_leveling_backup_${currentUser.username}_${formatDate(new Date())}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                showToast('✅ 数据文件已下载');
-            });
-
-            document.getElementById('importFriendDataBtn').addEventListener('click', () => {
-                const encoded = prompt('请粘贴好友的数据文本：');
-                if (!encoded) return;
-                try {
-                    const json = decodeURIComponent(escape(atob(encoded)));
-                    const imported = JSON.parse(json);
-                    if (!imported.uid || !imported.username) throw new Error('无效数据');
-                    allUsers[imported.uid] = imported;
-                    save();
-                    showToast('✅ 好友数据已导入');
-                    renderFriendList();
-                } catch (e) {
-                    showToast('❌ 数据格式错误，导入失败');
-                }
-            });
-
-            document.getElementById('addFriendBtn').addEventListener('click', () => {
-                const uid = document.getElementById('friendUidInput').value.trim();
-                if (!uid) return showToast('请输入UID');
-                if (uid === currentUser.uid) return showToast('不能添加自己');
-                if (currentUser.friends.includes(uid)) {
-                    showToast('该好友已在列表中');
-                } else {
-                    currentUser.friends.push(uid);
-                    save();
-                    showToast('✅ 好友添加成功');
-                    renderFriendList();
-                }
-                currentFriendUid = uid;
-                displayFriendReport(uid);
-            });
-
-            document.getElementById('refreshFriendDataBtn').addEventListener('click', () => {
-                if (currentFriendUid) {
-                    displayFriendReport(currentFriendUid);
-                    showToast('好友数据已刷新');
-                } else {
-                    showToast('请先选择一个好友查看');
-                }
-                renderFriendList();
-            });
-
-            function displayFriendReport(uid) {
-                const user = allUsers[uid];
-                const cont = document.getElementById('friendData');
-                if (!user) {
-                    cont.innerHTML =
-                        '<p style="text-align:center;color:#888;">好友暂无数据，请让好友使用"复制数据"或"导出文件"发送给你，然后点击"导入好友数据"。</p>';
-                    cont.style.display = 'block';
-                    return;
-                }
-                cont.innerHTML = generateReportContentForUser(user);
-                cont.style.display = 'block';
-            }
-
-            function generateReportContentForUser(user) {
-                const today = formatDate(new Date());
-                const thisMonday = getMonday(today);
-                const lastMonday = addWeek(thisMonday, -1);
-                const thisPlan = user.weeklyPlans[thisMonday] || { days: {}, weekType: null };
-                const thisWeekType = thisPlan.weekType;
-                let compareMonday = lastMonday;
-                if (thisWeekType) {
-                    const allMondays = Object.keys(user.weeklyPlans).filter(d => d < thisMonday).sort((a, b) => b.localeCompare(
-                        a));
-                    for (let d of allMondays) {
-                        if (user.weeklyPlans[d].weekType === thisWeekType) { compareMonday = d; break; }
-                    }
-                }
-                const comparePlan = user.weeklyPlans[compareMonday] || { days: {} };
-
-                function aggregateExercises(plan) {
-                    const result = {};
-                    for (let i = 0; i < 7; i++) {
-                        const day = plan.days[i] || { muscles: [] };
-                        if (!day.muscles) continue;
-                        day.muscles.forEach(muscle => {
-                            if (!muscle.muscleGroup || muscle.muscleGroup === '休息') return;
-                            if (!result[muscle.muscleGroup]) result[muscle.muscleGroup] = {};
-                            (muscle.exercises || []).forEach(e => {
-                                if (!result[muscle.muscleGroup][e.name]) result[muscle.muscleGroup][e.name] = {
-                                    sets: 0,
-                                    totalWeight: 0 };
-                                result[muscle.muscleGroup][e.name].sets += e.sets;
-                                result[muscle.muscleGroup][e.name].totalWeight += e.weight * e.sets;
-                            });
-                        });
-                    }
-                    return result;
-                }
-                const thisData = aggregateExercises(thisPlan);
-                const compareData = aggregateExercises(comparePlan);
-                let html = '<h3>📊 ' + escapeHtml(user.username) + ' 本周周报</h3>';
-                const thisWeekW = user.weightRecords.filter(r => r.date >= thisMonday);
-                const lastWeekW = user.weightRecords.filter(r => r.date >= lastMonday && r.date < thisMonday);
-                const avgThis = thisWeekW.length ? (thisWeekW.reduce((s, r) => s + r.weight, 0) / thisWeekW.length).toFixed(1) :
-                    null;
-                const avgLast = lastWeekW.length ? (lastWeekW.reduce((s, r) => s + r.weight, 0) / lastWeekW.length).toFixed(1) :
-                    null;
-                html += '<p style="font-size:13px;">体重：本周平均 <b>' + (avgThis || '-') + ' kg</b>';
-                if (avgLast) html += '，上周 ' + avgLast + ' kg';
-                html += '</p><h4>💪 训练动作对比</h4>';
-                const allMuscles = new Set([...Object.keys(thisData), ...Object.keys(compareData)]);
-                if (allMuscles.size === 0) {
-                    html += '<p>本周无训练记录</p>';
-                } else {
-                    html +=
-                        '<table class="stats-table"><tr><th>肌群</th><th>动作</th><th>组数</th><th>均重</th><th>组变</th><th>重变</th></tr>';
-                    allMuscles.forEach(mg => {
-                        const thisMuscleData = thisData[mg] || {};
-                        const compareMuscleData = compareData[mg] || {};
-                        const allExercises = new Set([...Object.keys(thisMuscleData), ...Object.keys(
-                            compareMuscleData)]);
-                        html +=
-                            `<tr class="muscle-group-header"><td colspan="6">${escapeHtml(mg)}</td></tr>`;
-                        allExercises.forEach(ex => {
-                            const cur = thisMuscleData[ex] || { sets: 0, totalWeight: 0 };
-                            const prev = compareMuscleData[ex] || { sets: 0, totalWeight: 0 };
-                            const curAvg = cur.sets ? (cur.totalWeight / cur.sets).toFixed(1) : '0';
-                            const prevAvg = prev.sets ? (prev.totalWeight / prev.sets).toFixed(1) :
-                                '0';
-                            let setChange = '-',
-                                weightChange = '-';
-                            if (prev.sets > 0) {
-                                const sp = ((cur.sets - prev.sets) / prev.sets * 100).toFixed(0);
-                                setChange = (sp > 0 ? '+' : '') + sp + '%';
-                                const wp = ((parseFloat(curAvg) - parseFloat(prevAvg)) /
-                                    parseFloat(prevAvg) * 100).toFixed(0);
-                                weightChange = (wp > 0 ? '+' : '') + wp + '%';
-                            } else if (cur.sets > 0) { setChange = '新';
-                                weightChange = '新'; }
-                            html +=
-                                `<tr><td></td><td>${escapeHtml(ex)}</td><td>${cur.sets}</td><td>${curAvg}</td><td>${setChange}</td><td>${weightChange}</td></tr>`;
-                        });
-                    });
-                    html += '</table>';
-                }
-                html += `<p style="margin-top:8px;font-size:12px;">对比基准：${thisWeekType==='strength'?'增力周':thisWeekType==='volume'?'容量周':'上周'} (${compareMonday})</p>`;
-                return html;
-            }
-
-            // 导航
-            document.querySelectorAll('.nav button').forEach(b => b.addEventListener('click', () => switchPanel(b.dataset
-                .panel)));
-
-            // 自动登录
-            const lastUID = localStorage.getItem('lastLoggedUID_v2');
-            if (lastUID && allUsers[lastUID]) {
-                currentUser = allUsers[lastUID];
-                showMain();
-            }
-            window.addEventListener('beforeunload', () => {
-                if (currentUser) localStorage.setItem('lastLoggedUID_v2', currentUser.uid);
-                saveAllUsers();
-            });
-
-            // 定期自动保存
-            setInterval(() => {
-                if (currentUser) saveAllUsers();
-            }, 30000);
-
-            // 触摸反馈
-            document.addEventListener('touchstart', function() {}, { passive: true });
-
-            console.log('⚡ 我独自升级 - 移动端优化版已就绪');
-            console.log('📱 支持添加到主屏幕(PWA)');
-            console.log('💾 数据存储在本地，图片使用IndexedDB存储');
-            console.log('📤 支持数据导出为文件备份');
-        })();
-    </script>
+  </div>
+
+  <!-- 主界面 -->
+  <div id="main-screen" class="hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <h2 style="color:#ff6b6b;margin:0;font-size:22px;">⚡ 我独自升级</h2>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button type="button" id="storageInfoBtn" class="small ghost" style="font-size:10px;">💾</button>
+        <button type="button" id="logoutBtn" class="small ghost">退出</button>
+      </div>
+    </div>
+    <p style="font-size:12px;opacity:0.8;">👤 <span id="myName"></span> | UID: <span id="myUid"></span></p>
+    <div style="display:flex;gap:6px;margin:6px 0;flex-wrap:wrap;">
+      <button id="weeklyReportBtn" class="secondary" style="flex:1;min-width:110px;">📈 本周统计</button>
+      <button id="refreshReportBtn" class="small secondary" style="flex:1;min-width:70px;">🔄 刷新</button>
+    </div>
+    <div class="nav">
+      <button type="button" class="active" data-panel="weight">⚖️体重</button>
+      <button type="button" data-panel="strength">💪力量</button>
+      <button type="button" data-panel="onerm">🏋️1PR</button>
+      <button type="button" data-panel="physique">📷形体</button>
+      <button type="button" data-panel="friends">👥朋友</button>
+    </div>
+
+    <!-- 体重面板 -->
+    <div id="weight-panel" class="panel">
+      <div class="period-select">
+        <select id="periodDropdown">
+          <option value="7d">7天</option><option value="14d">14天</option><option value="30d">30天</option>
+          <option value="this_month">本月</option><option value="last_month">上月</option>
+          <option value="60d">60天</option><option value="90d">90天</option>
+          <option value="this_year">本年</option><option value="last_year">去年</option>
+          <option value="all" selected>全部</option>
+        </select>
+      </div>
+      <div class="stats-card">
+        <p style="margin-bottom:6px;font-weight:600;">📅 今日体重快速记录</p>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <input id="quickWeight" type="number" placeholder="体重 (kg)" step="0.1" style="flex:2;min-width:90px;" inputmode="decimal">
+          <select id="quickPhase" style="flex:1;min-width:70px;"><option value="bulk">增肌期</option><option value="cut">减脂期</option></select>
+        </div>
+        <button id="quickRecordBtn">记录今日体重</button>
+      </div>
+      <div class="collapsible stats-card" id="manualDateToggle" style="font-size:14px;">📆 手动选择日期记录 <span style="font-size:11px;opacity:0.7;">(点击展开)</span></div>
+      <div class="collapsible-content">
+        <div class="stats-card">
+          <input type="date" id="weightDate">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <input type="number" id="weightValue" placeholder="体重 (kg)" step="0.1" style="flex:2;min-width:90px;" inputmode="decimal">
+            <select id="weightPhaseSelect" style="flex:1;min-width:70px;"><option value="bulk">增肌期</option><option value="cut">减脂期</option></select>
+          </div>
+          <button id="addWeightBtn">记录体重</button>
+        </div>
+      </div>
+      <div class="chart-wrapper"><div id="weightChartDiv"></div></div>
+      <div id="weightSuggestion" class="stats-card" style="color:#ff9f43;font-size:13px;"></div>
+      <div class="file-upload-wrapper" style="margin-top:14px;">
+        <label for="xlsxUpload" class="file-btn">📂 上传 Excel 批量导入</label>
+        <input type="file" id="xlsxUpload" accept=".xlsx,.xls">
+        <button id="mapXlsxBtn" class="small download-btn" disabled>映射替换</button>
+        <button id="downloadTemplateBtn" class="small download-btn">⬇️ 模板</button>
+      </div>
+    </div>
+
+    <!-- 力量面板 -->
+    <div id="strength-panel" class="panel hidden">
+      <div class="week-navigator">
+        <button id="prevWeekBtn" class="small">◀ 上周</button>
+        <span id="currentWeekLabel" style="font-size:13px;font-weight:600;"></span>
+        <button id="nextWeekBtn" class="small">下周 ▶</button>
+        <button id="todayStrengthBtn" class="small">今天</button>
+      </div>
+      <div class="week-grid" id="weekGrid"></div>
+      <div style="display:flex;gap:6px;margin:8px 0;">
+        <div id="strengthWeekBtn" class="phase-btn-small strength">🔥 增力周</div>
+        <div id="volumeWeekBtn" class="phase-btn-small volume">💧 容量周</div>
+      </div>
+      <div id="dayDetail" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- 1PR面板 -->
+    <div id="onerm-panel" class="panel hidden">
+      <h3>最大1PR推算</h3>
+      <select id="prMuscleGroup"><option value="">选择肌群</option><option value="胸部">胸部</option><option value="背部">背部</option><option value="腿部">腿部</option><option value="肩部">肩部</option><option value="手臂">手臂</option></select>
+      <select id="prExercise" class="hidden"></select>
+      <button id="addPrExerciseBtn" class="small secondary hidden">+ 添加动作</button>
+      <input type="number" id="repsInput" placeholder="完成的次数" inputmode="numeric">
+      <input type="number" id="weightInput" placeholder="使用的重量 (kg)" inputmode="decimal">
+      <select id="prFormula" style="margin:7px 0;">
+        <option value="epley" selected>Epley (1+次数/30)</option>
+        <option value="brzycki">Brzycki (36/(37-次数))</option>
+        <option value="lombardi">Lombardi (次数^0.1)</option>
+        <option value="mayhew">Mayhew</option>
+        <option value="lander">Lander</option>
+      </select>
+      <button id="calc1RM">计 算</button>
+      <p id="rmResult" style="text-align:center;font-size:30px;margin-top:14px;color:#ff6b6b;font-weight:700;"></p>
+      <p id="formulaUsed" style="text-align:center;color:#aaa;font-size:13px;"></p>
+    </div>
+
+    <!-- 形体面板 -->
+    <div id="physique-panel" class="panel hidden">
+      <div class="week-navigator">
+        <button id="physiquePrevWeek" class="small">◀ 上周</button>
+        <span id="physiqueWeekLabel" style="font-size:13px;font-weight:600;"></span>
+        <button id="physiqueNextWeek" class="small">下周 ▶</button>
+        <button id="todayPhysiqueBtn" class="small">今天</button>
+      </div>
+      <div class="week-grid" id="physiqueWeekGrid"></div>
+      <input type="file" id="physiqueImageUpload" accept="image/*" multiple style="display:none;">
+      <input type="hidden" id="physiqueTargetDate">
+      <div id="physiqueUploadStatus" style="text-align:center;margin-top:6px;color:#aaa;font-size:12px;"></div>
+    </div>
+
+    <!-- 朋友面板 -->
+    <div id="friends-panel" class="panel hidden">
+      <h3>朋友数据</h3>
+      <input type="text" id="friendUidInput" placeholder="输入好友UID" inputmode="numeric" style="text-align:center;">
+      <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+        <button id="addFriendBtn" style="flex:1;min-width:90px;">添加并查看</button>
+        <button id="refreshFriendDataBtn" class="small secondary" style="flex:1;min-width:90px;">刷新当前好友</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+        <button id="exportMyDataBtn" class="small secondary">📤 复制数据</button>
+        <button id="exportMyDataFileBtn" class="small secondary">💾 导出文件</button>
+        <button id="importFriendDataBtn" class="small secondary">📥 导入好友数据</button>
+      </div>
+      <div id="friendList" class="stats-card" style="margin-top:6px;"></div>
+      <div id="friendData" class="stats-card" style="margin-top:10px;display:none;"></div>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+  (function() {
+    let deferredPrompt = null;
+    const installBanner = document.getElementById('installBanner');
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installBanner) installBanner.style.display = 'flex';
+    });
+    if (installBanner) {
+      installBanner.addEventListener('click', function() {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function(result) {
+            if (result.outcome === 'accepted') { installBanner.style.display = 'none'; showToast('✅ 应用已安装到主屏幕'); }
+            deferredPrompt = null;
+          });
+        } else { installBanner.style.display = 'none'; showToast('💡 请使用浏览器菜单中的"添加到主屏幕"'); }
+      });
+    }
+    window.addEventListener('appinstalled', function() { if (installBanner) installBanner.style.display = 'none'; deferredPrompt = null; });
+
+    let toastTimeout;
+    function showToast(msg, duration = 2000) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.pointerEvents = 'auto';
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => { toast.style.opacity = '0'; toast.style.pointerEvents = 'none'; }, duration);
+    }
+
+    const STORAGE_KEY = 'solo_leveling_users_v2';
+    const LOGIN_HISTORY_KEY = 'solo_login_history';
+    let allUsers = {};
+    let imgDB = null;
+    const IMG_DB_NAME = 'SoloLevelingImagesV2';
+    const IMG_STORE = 'images';
+
+    function loadAllUsers() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        allUsers = raw ? JSON.parse(raw) : {};
+        if (typeof allUsers !== 'object' || allUsers === null) { allUsers = {}; localStorage.setItem(STORAGE_KEY, '{}'); }
+      } catch (e) { allUsers = {}; localStorage.setItem(STORAGE_KEY, '{}'); }
+      let needsSave = false;
+      for (const uid in allUsers) {
+        const u = allUsers[uid];
+        if (!u.weightRecords) { u.weightRecords = []; needsSave = true; }
+        if (!u.weeklyPlans) { u.weeklyPlans = {}; needsSave = true; }
+        if (!u.friends) { u.friends = []; needsSave = true; }
+        if (!u.customExercises) { u.customExercises = {}; needsSave = true; }
+      }
+      if (needsSave) saveAllUsers();
+    }
+
+    function saveAllUsers() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(allUsers));
+      } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+          showToast('⚠️ 存储空间不足！正在清理旧图片...', 4000);
+          cleanOldImages();
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(allUsers)); } catch (e2) { showToast('❌ 存储空间严重不足，请导出数据并清理', 5000); }
+        }
+      }
+    }
+
+    function getLoginHistory() {
+      try {
+        const raw = localStorage.getItem(LOGIN_HISTORY_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) { return []; }
+    }
+
+    function addLoginHistory(username, uid) {
+      let history = getLoginHistory();
+      history = history.filter(h => h.uid !== uid);
+      history.unshift({ username, uid, time: Date.now() });
+      if (history.length > 5) history.pop();
+      localStorage.setItem(LOGIN_HISTORY_KEY, JSON.stringify(history));
+    }
+
+    function renderQuickLogin() {
+      const area = document.getElementById('quickLoginArea');
+      if (!area) return;
+      const history = getLoginHistory();
+      if (history.length === 0) { area.innerHTML = ''; return; }
+      let html = '<p style="font-size:13px;color:#aaa;margin-top:10px;">快捷登录</p>';
+      history.forEach(h => {
+        html += `<div class="quick-login-item" data-uid="${h.uid}">
+          <span>👤 ${escapeHtml(h.username)}</span>
+          <span style="font-size:11px;color:#888;">UID:${h.uid}</span>
+        </div>`;
+      });
+      area.innerHTML = html;
+      document.querySelectorAll('.quick-login-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const uid = this.dataset.uid;
+          if (allUsers[uid]) {
+            currentUser = allUsers[uid];
+            addLoginHistory(currentUser.username, currentUser.uid);
+            showMain();
+          } else {
+            showToast('用户数据不存在，请重新登录');
+            let history = getLoginHistory();
+            history = history.filter(h => h.uid !== uid);
+            localStorage.setItem(LOGIN_HISTORY_KEY, JSON.stringify(history));
+            renderQuickLogin();
+          }
+        });
+      });
+    }
+
+    function cleanOldImages() {
+      const now = new Date();
+      const cutoff = new Date(now.getFullYear(), now.getMonth()-3, now.getDate());
+      const cutoffStr = formatDate(cutoff);
+      for (const uid in allUsers) {
+        const user = allUsers[uid];
+        const keys = Object.keys(user).filter(k => k.startsWith('physique_'));
+        const oldKeys = keys.filter(k => { const dateStr = k.replace('physique_',''); return dateStr < cutoffStr; });
+        if (oldKeys.length > 10) {
+          oldKeys.slice(0, oldKeys.length-5).forEach(k => { delete user[k]; deleteImageFromDB(uid+'_'+k).catch(()=>{}); });
+        }
+      }
+    }
+
+    function openImgDB() {
+      return new Promise((resolve, reject) => {
+        if (imgDB) return resolve(imgDB);
+        const request = indexedDB.open(IMG_DB_NAME, 1);
+        request.onupgradeneeded = function(e) { const db = e.target.result; if (!db.objectStoreNames.contains(IMG_STORE)) db.createObjectStore(IMG_STORE, { keyPath: 'id' }); };
+        request.onsuccess = function(e) { imgDB = e.target.result; resolve(imgDB); };
+        request.onerror = function(e) { console.warn('IndexedDB不可用'); reject(e); };
+      });
+    }
+
+    async function saveImageToDB(key, imagesArray) {
+      try {
+        const db = await openImgDB();
+        const tx = db.transaction(IMG_STORE, 'readwrite');
+        const store = tx.objectStore(IMG_STORE);
+        store.put({ id: key, images: imagesArray });
+        return new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = reject; });
+      } catch (e) { return null; }
+    }
+    async function loadImageFromDB(key) {
+      try {
+        const db = await openImgDB();
+        const tx = db.transaction(IMG_STORE, 'readonly');
+        const store = tx.objectStore(IMG_STORE);
+        const result = await new Promise((resolve, reject) => { const req = store.get(key); req.onsuccess = () => resolve(req.result); req.onerror = reject; });
+        return result ? result.images : null;
+      } catch (e) { return null; }
+    }
+    async function deleteImageFromDB(key) {
+      try {
+        const db = await openImgDB();
+        const tx = db.transaction(IMG_STORE, 'readwrite');
+        const store = tx.objectStore(IMG_STORE);
+        store.delete(key);
+        return new Promise((resolve) => { tx.oncomplete = resolve; });
+      } catch (e) { return null; }
+    }
+    async function getUserImages(user, key) {
+      const dbImages = await loadImageFromDB(user.uid + '_' + key);
+      if (dbImages !== null) return dbImages;
+      return user[key] || [];
+    }
+    async function setUserImages(user, key, imagesArray) {
+      user[key] = imagesArray;
+      await saveImageToDB(user.uid + '_' + key, imagesArray);
+    }
+    async function deleteUserImages(user, key) {
+      delete user[key];
+      await deleteImageFromDB(user.uid + '_' + key);
+    }
+
+    loadAllUsers();
+    openImgDB().catch(()=>{});
+    renderQuickLogin();
+
+    let currentUser = null;
+    let pendingXlsxRecords = [];
+    let weightPeriod = 'all';
+    let currentFriendUid = null;
+
+    function save() { saveAllUsers(); }
+
+    function generateUID() {
+      let uid;
+      do { uid = Math.floor(100000 + Math.random() * 900000).toString(); } while (allUsers[uid]);
+      return uid;
+    }
+
+    const exerciseLibrary = {
+      '胸部': ['平板卧推','上斜卧推','下斜卧推','哑铃飞鸟','上斜哑铃飞鸟','双杠臂屈伸','绳索夹胸','蝴蝶机夹胸','俯卧撑','器械推胸','斯万推胸','弹力带夹胸'],
+      '背部': ['引体向上','杠铃划船','哑铃划船','高位下拉','坐姿划船','T杆划船','直臂下压','山羊挺身','硬拉','单臂哑铃划船','宽握引体','绳索面拉'],
+      '腿部': ['深蹲','硬拉','腿举','腿弯举','负重提踵','保加利亚分腿蹲','箭步蹲','哈克深蹲','臀桥','腿屈伸','站姿提踵','倒蹬机'],
+      '肩部': ['哑铃推举','侧平举','前平举','面拉','阿诺德推举','杠铃推举','俯身飞鸟','绳索侧平举','直立划船','蝴蝶机反向飞鸟'],
+      '手臂': ['杠铃弯举','锤式弯举','三头下压','窄距卧推','集中弯举','牧师椅弯举','绳索锤式弯举','双杠臂屈伸（臂）','仰卧臂屈伸','腕弯举']
+    };
+
+    function getMonday(dateStr) {
+      const parts = dateStr.split('-');
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+      const dayOfWeek = d.getDay();
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      d.setDate(d.getDate() + diff);
+      return formatDate(d);
+    }
+    function formatDate(date) {
+      const y = date.getFullYear(); const m = String(date.getMonth()+1).padStart(2,'0'); const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+    function addWeek(monday, weeks) {
+      const parts = monday.split('-'); const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+      d.setDate(d.getDate() + weeks*7); return formatDate(d);
+    }
+    function getMonthOffsetDate(dateStr, offset) {
+      const [y,m,d] = dateStr.split('-').map(Number); const dObj = new Date(y, m-1, d); dObj.setMonth(dObj.getMonth()+offset); return formatDate(dObj);
+    }
+    function parseDateToISO(str) {
+      if (!str) return null;
+      let d = new Date(str); if (!isNaN(d.getTime())) return formatDate(d);
+      const parts = String(str).split(/[-/]/); if (parts.length===3) {
+        const y=parseInt(parts[0]), m=parseInt(parts[1]), day=parseInt(parts[2]);
+        if (y>1900 && m>=1 && m<=12 && day>=1 && day<=31) return `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      }
+      return null;
+    }
+    function escapeHtml(text) { const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}; return String(text).replace(/[&<>"']/g, m=>map[m]); }
+
+    function showAuthMsg(text, isError=true) {
+      const el = document.getElementById('authMsg'); if (!el) return;
+      el.textContent = text; el.style.color = isError ? '#ff6b6b' : '#2ecc71';
+      setTimeout(()=>el.textContent='', 3000);
+    }
+
+    function showMain() {
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('main-screen').classList.remove('hidden');
+      document.getElementById('myUid').textContent = currentUser.uid;
+      document.getElementById('myName').textContent = currentUser.username;
+      switchPanel('weight');
+    }
+
+    function switchPanel(name) {
+      ['weight','strength','onerm','physique','friends'].forEach(id => document.getElementById(id+'-panel').classList.add('hidden'));
+      document.getElementById(name+'-panel').classList.remove('hidden');
+      document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+      const btn = document.querySelector(`.nav button[data-panel="${name}"]`);
+      if (btn) btn.classList.add('active');
+      if (name==='weight') renderWeightPanel();
+      if (name==='strength') renderStrengthWeek();
+      if (name==='physique') renderPhysiquePanel();
+      if (name==='onerm') { document.getElementById('prMuscleGroup').value=''; document.getElementById('prExercise').classList.add('hidden'); document.getElementById('addPrExerciseBtn').classList.add('hidden'); }
+      if (name==='friends') renderFriendList();
+    }
+
+    document.getElementById('storageInfoBtn').addEventListener('click', () => {
+      const usage = getStorageUsage();
+      const pct = Math.min(100, Math.round(usage/(5*1024*1024)*100));
+      const msg = `💾 存储使用: ${formatBytes(usage)} / ~5MB (${pct}%)` + (pct>80 ? '\n⚠️ 建议导出数据并清理旧图片' : ' ✅ 存储空间充足');
+      showToast(msg, 4000);
+    });
+    function getStorageUsage() {
+      let total=0; for(let key in localStorage) if(localStorage.hasOwnProperty(key)) total+=localStorage[key].length*2; return total;
+    }
+    function formatBytes(bytes) { if(bytes<1024) return bytes+' B'; if(bytes<1024*1024) return (bytes/1024).toFixed(1)+' KB'; return (bytes/(1024*1024)).toFixed(1)+' MB'; }
+
+    function generateReportContent() {
+      if (!currentUser) return '<p>请先登录</p>';
+      const today = formatDate(new Date()); const thisMonday = getMonday(today); const lastMonday = addWeek(thisMonday, -1);
+      const thisPlan = currentUser.weeklyPlans[thisMonday]||{days:{},weekType:null}; const thisWeekType = thisPlan.weekType;
+      let compareMonday = lastMonday;
+      if (thisWeekType) {
+        const allMondays = Object.keys(currentUser.weeklyPlans).filter(d=>d<thisMonday).sort((a,b)=>b.localeCompare(a));
+        for (let d of allMondays) { if (currentUser.weeklyPlans[d].weekType===thisWeekType) { compareMonday = d; break; } }
+      }
+      const comparePlan = currentUser.weeklyPlans[compareMonday]||{days:{}};
+      function aggregate(plan) {
+        const res={}; for(let i=0;i<7;i++){ const day=plan.days[i]||{muscles:[]}; if(!day.muscles) continue;
+          day.muscles.forEach(m=>{ if(!m.muscleGroup||m.muscleGroup==='休息') return; if(!res[m.muscleGroup]) res[m.muscleGroup]={};
+            (m.exercises||[]).forEach(e=>{ if(!res[m.muscleGroup][e.name]) res[m.muscleGroup][e.name]={sets:0,totalWeight:0}; res[m.muscleGroup][e.name].sets+=e.sets; res[m.muscleGroup][e.name].totalWeight+=e.weight*e.sets; }); }); } return res;
+      }
+      const thisData = aggregate(thisPlan), compareData = aggregate(comparePlan);
+      let html = '<h3>📊 本周详细周报</h3>';
+      const thisWeekW = currentUser.weightRecords.filter(r=>r.date>=thisMonday), lastWeekW = currentUser.weightRecords.filter(r=>r.date>=lastMonday&&r.date<thisMonday);
+      const avgThis = thisWeekW.length ? (thisWeekW.reduce((s,r)=>s+r.weight,0)/thisWeekW.length).toFixed(1):null;
+      const avgLast = lastWeekW.length ? (lastWeekW.reduce((s,r)=>s+r.weight,0)/lastWeekW.length).toFixed(1):null;
+      html += `<p>体重：本周平均 <b>${avgThis||'-'} kg</b>`; if(avgLast) html += `，上周 ${avgLast} kg`; html+='</p><h4>💪 训练对比</h4>';
+      const allMuscles = new Set([...Object.keys(thisData),...Object.keys(compareData)]);
+      if(allMuscles.size===0){ html+='<p>本周无训练记录</p>'; } else {
+        html+='<table class="stats-table"><tr><th>肌群</th><th>动作</th><th>组数</th><th>均重</th><th>组变</th><th>重变</th></tr>';
+        allMuscles.forEach(mg=>{
+          const thisM=thisData[mg]||{}, compM=compareData[mg]||{}; const exs=new Set([...Object.keys(thisM),...Object.keys(compM)]);
+          html+=`<tr class="muscle-group-header"><td colspan="6">${escapeHtml(mg)}</td></tr>`;
+          exs.forEach(ex=>{
+            const cur=thisM[ex]||{sets:0,totalWeight:0}, prev=compM[ex]||{sets:0,totalWeight:0};
+            const curAvg=cur.sets?(cur.totalWeight/cur.sets).toFixed(1):'0', prevAvg=prev.sets?(prev.totalWeight/prev.sets).toFixed(1):'0';
+            let setChange='-', weightChange='-';
+            if(prev.sets>0){ const sp=((cur.sets-prev.sets)/prev.sets*100).toFixed(0); setChange=(sp>0?'+':'')+sp+'%'; const wp=((parseFloat(curAvg)-parseFloat(prevAvg))/parseFloat(prevAvg)*100).toFixed(0); weightChange=(wp>0?'+':'')+wp+'%'; }
+            else if(cur.sets>0){ setChange='新'; weightChange='新'; }
+            html+=`<tr><td></td><td>${escapeHtml(ex)}</td><td>${cur.sets}</td><td>${curAvg}</td><td>${setChange}</td><td>${weightChange}</td></tr>`;
+          });
+        });
+        html+='</table>';
+      }
+      html+=`<p style="margin-top:8px;">对比基准：${thisWeekType==='strength'?'增力周':thisWeekType==='volume'?'容量周':'上周'} (${compareMonday})</p>`;
+      return html;
+    }
+    function showWeeklyReport() { showModal(generateReportContent()); }
+    document.getElementById('weeklyReportBtn').addEventListener('click', showWeeklyReport);
+    document.getElementById('refreshReportBtn').addEventListener('click', ()=>showToast('数据已刷新'));
+
+    function showModal(content) {
+      const modal = document.createElement('div'); modal.className='modal';
+      modal.innerHTML = `<div class="modal-content">${content}<button class="small secondary" style="margin-top:10px;width:100%;min-height:44px;">✕ 关闭</button></div>`;
+      document.body.appendChild(modal);
+      const close = ()=>modal.remove(); modal.addEventListener('click',e=>{if(e.target===modal)close();});
+      modal.querySelector('.modal-content button').addEventListener('click',close);
+    }
+
+    document.getElementById('loginBtn').addEventListener('click',()=>{
+      const uname=document.getElementById('username').value.trim(), pwd=document.getElementById('password').value;
+      if(!uname||!pwd) return showAuthMsg('请输入用户名和密码');
+      const user = Object.values(allUsers).find(u=>u.username===uname&&u.password===pwd);
+      if(!user) return showAuthMsg('用户名或密码错误');
+      currentUser=user; addLoginHistory(user.username, user.uid); showMain();
+    });
+    document.getElementById('regBtn').addEventListener('click',()=>{
+      const uname=document.getElementById('username').value.trim(), pwd=document.getElementById('password').value;
+      if(!uname||!pwd) return showAuthMsg('请输入用户名和密码');
+      if(uname.length<2) return showAuthMsg('用户名至少2个字符');
+      if(pwd.length<3) return showAuthMsg('密码至少3位');
+      if(Object.values(allUsers).some(u=>u.username===uname)) return showAuthMsg('用户名已存在');
+      const uid=generateUID(); allUsers[uid]={uid,username:uname,password:pwd,weightRecords:[],weeklyPlans:{},friends:[],customExercises:{}};
+      save(); showAuthMsg('✅ 注册成功！UID: '+uid+'，请登录',false);
+      document.getElementById('username').value=''; document.getElementById('password').value='';
+    });
+    document.getElementById('logoutBtn').addEventListener('click',()=>{
+      currentUser=null; localStorage.removeItem('lastLoggedUID_v2');
+      document.getElementById('auth-screen').classList.remove('hidden');
+      document.getElementById('main-screen').classList.add('hidden');
+      document.getElementById('friendData').style.display='none'; currentFriendUid=null;
+    });
+
+    // 体重
+    document.getElementById('manualDateToggle').addEventListener('click',function(){ this.classList.toggle('active'); const c=this.nextElementSibling; c.style.display=c.style.display==='block'?'none':'block'; });
+    document.getElementById('quickRecordBtn').addEventListener('click',()=>{
+      if(!currentUser) return; const w=parseFloat(document.getElementById('quickWeight').value); if(isNaN(w)||w<20||w>300) return showToast('请输入合理体重');
+      const phase=document.getElementById('quickPhase').value; const today=formatDate(new Date());
+      const idx=currentUser.weightRecords.findIndex(r=>r.date===today);
+      if(idx!==-1) currentUser.weightRecords[idx]={date:today,weight:w,phase}; else currentUser.weightRecords.push({date:today,weight:w,phase});
+      currentUser.weightRecords.sort((a,b)=>a.date.localeCompare(b.date)); save(); document.getElementById('quickWeight').value=''; renderWeightPanel(); showToast('✅ 体重已记录');
+    });
+    document.getElementById('addWeightBtn').addEventListener('click',()=>{
+      if(!currentUser) return; const date=document.getElementById('weightDate').value, w=parseFloat(document.getElementById('weightValue').value);
+      if(!date||isNaN(w)) return showToast('请填写日期和体重'); const phase=document.getElementById('weightPhaseSelect').value;
+      const idx=currentUser.weightRecords.findIndex(r=>r.date===date);
+      if(idx!==-1) currentUser.weightRecords[idx]={date,weight:w,phase}; else currentUser.weightRecords.push({date,weight:w,phase});
+      currentUser.weightRecords.sort((a,b)=>a.date.localeCompare(b.date)); save(); renderWeightPanel(); showToast('✅ 体重已添加');
+    });
+    document.getElementById('periodDropdown').addEventListener('change',function(){ weightPeriod=this.value; renderWeightPanel(); });
+    function getFilteredByPeriod(period) {
+      if(!currentUser) return []; const records=[...currentUser.weightRecords].sort((a,b)=>a.date.localeCompare(b.date));
+      if(period==='all') return records; const now=new Date(); const today=formatDate(now); let start,end;
+      switch(period){
+        case'7d': start=formatDate(new Date(Date.now()-7*86400000)); end=today; break;
+        case'14d': start=formatDate(new Date(Date.now()-14*86400000)); end=today; break;
+        case'30d': start=formatDate(new Date(Date.now()-30*86400000)); end=today; break;
+        case'60d': start=formatDate(new Date(Date.now()-60*86400000)); end=today; break;
+        case'90d': start=formatDate(new Date(Date.now()-90*86400000)); end=today; break;
+        case'this_month': start=formatDate(new Date(now.getFullYear(),now.getMonth(),1)); end=today; break;
+        case'last_month':{ const f=new Date(now.getFullYear(),now.getMonth()-1,1), l=new Date(now.getFullYear(),now.getMonth(),0); return records.filter(r=>r.date>=formatDate(f)&&r.date<=formatDate(l)); }
+        case'this_year': start=formatDate(new Date(now.getFullYear(),0,1)); end=today; break;
+        case'last_year':{ const y=now.getFullYear()-1; return records.filter(r=>r.date>=formatDate(new Date(y,0,1))&&r.date<=formatDate(new Date(y,11,31))); }
+        default: return records;
+      }
+      return records.filter(r=>r.date>=start&&r.date<=end);
+    }
+    function renderWeightPanel() { const records=getFilteredByPeriod(weightPeriod); drawWeightChart(records); updateSuggestion(records); }
+    function drawWeightChart(records) {
+      const container=document.getElementById('weightChartDiv'); if(!container) return;
+      if(records.length===0){ container.innerHTML='<div style="text-align:center;padding:40px;color:#aaa;">暂无体重数据</div>'; return; }
+      const dates=records.map(r=>r.date), weights=records.map(r=>r.weight), phases=records.map(r=>r.phase);
+      const trace={ x:dates, y:weights, type:'scatter', mode:'lines+markers', marker:{ color:phases.map(p=>p==='bulk'?'#27ae60':'#e74c3c'), size:8, line:{width:1,color:'#fff'} }, line:{color:'#ff6b6b',width:2.5}, hovertemplate:'%{x}<br>%{y} kg' };
+      const layout={ title:document.getElementById('periodDropdown').selectedOptions[0]?.text||'全部', paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(31,43,77,0.6)', font:{color:'#ccc',size:11}, xaxis:{tickformat:'%m-%d',gridcolor:'#444',tickangle:-30}, yaxis:{title:'kg',gridcolor:'#444'}, margin:{l:45,r:15,t:40,b:60}, hovermode:'closest' };
+      Plotly.newPlot(container,[trace],layout,{displayModeBar:false,responsive:true});
+    }
+    function updateSuggestion(records) {
+      const el=document.getElementById('weightSuggestion'); if(!el) return;
+      if(records.length<2){ el.textContent='数据不足，至少2条'; return; }
+      const first=records[0], last=records[records.length-1]; const change=last.weight-first.weight;
+      const days=Math.max(1,Math.round((new Date(last.date)-new Date(first.date))/86400000)); const weekly=(change/(days/7)).toFixed(2);
+      let sug=''; if(last.phase==='bulk') sug=weekly<0.2?'增肌偏慢':weekly>0.6?'增重较快':'趋势良好'; else sug=weekly>-0.2?'减脂较慢':weekly<-0.8?'减重过快':'速率正常';
+      el.textContent=`📊 ${records.length}条 | 趋势${change.toFixed(1)}kg | ${sug} (周均${weekly}kg)`;
+    }
+    // Excel
+    document.getElementById('downloadTemplateBtn').addEventListener('click',()=>{
+      if(typeof XLSX==='undefined') return showToast('需要加载SheetJS'); const ws=XLSX.utils.aoa_to_sheet([['日期','体重','增肌期/减脂期'],['2025-01-01',70,'增肌期']]); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'体重记录'); XLSX.writeFile(wb,'体重记录模板.xlsx');
+    });
+    document.getElementById('xlsxUpload').addEventListener('change',function(e){
+      const file=e.target.files[0]; if(!file) return; if(typeof XLSX==='undefined') return showToast('需要加载SheetJS');
+      const reader=new FileReader(); reader.onload=function(ev){
+        try{
+          const data=new Uint8Array(ev.target.result); const wb=XLSX.read(data,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]]; const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false});
+          if(rows.length<2) return showToast('至少表头+数据'); const headers=rows[0].map(h=>String(h).trim()); const di=headers.indexOf('日期'),wi=headers.indexOf('体重'); if(di===-1||wi===-1) return showToast('表头需日期体重');
+          pendingXlsxRecords=[]; for(let i=1;i<rows.length;i++){ const r=rows[i]; let date=parseDateToISO(r[di]); if(!date) continue; const weight=parseFloat(r[wi]); if(isNaN(weight)) continue; const phase=String(r[headers.indexOf('增肌期/减脂期')]||'').trim(); pendingXlsxRecords.push({date,weight,phase:phase==='增肌期'?'bulk':'cut'}); }
+          document.getElementById('mapXlsxBtn').disabled=false; showToast(`读取${pendingXlsxRecords.length}条，点击映射替换`);
+        }catch(err){ showToast('解析失败'); }
+      }; reader.readAsArrayBuffer(file); e.target.value='';
+    });
+    document.getElementById('mapXlsxBtn').addEventListener('click',()=>{
+      if(!currentUser||pendingXlsxRecords.length===0) return; if(!confirm(`将替换全部体重记录？`)) return;
+      currentUser.weightRecords=pendingXlsxRecords; currentUser.weightRecords.sort((a,b)=>a.date.localeCompare(b.date)); save(); pendingXlsxRecords=[]; document.getElementById('mapXlsxBtn').disabled=true; weightPeriod='all'; document.getElementById('periodDropdown').value='all'; renderWeightPanel(); showToast('已替换');
+    });
+
+    // 力量
+    let currentStrengthMonday = getMonday(formatDate(new Date()));
+    function setStrengthMonday(d){ currentStrengthMonday=d; renderStrengthWeek(); }
+    document.getElementById('prevWeekBtn').addEventListener('click',()=>setStrengthMonday(addWeek(currentStrengthMonday,-1)));
+    document.getElementById('nextWeekBtn').addEventListener('click',()=>setStrengthMonday(addWeek(currentStrengthMonday,1)));
+    document.getElementById('todayStrengthBtn').addEventListener('click',()=>setStrengthMonday(getMonday(formatDate(new Date()))));
+    function getPlan(m){ if(!currentUser.weeklyPlans[m]) currentUser.weeklyPlans[m]={days:{},weekType:null}; return currentUser.weeklyPlans[m]; }
+    function updateWeekTypeButtons(){ const p=getPlan(currentStrengthMonday); document.getElementById('strengthWeekBtn').classList.toggle('active',p.weekType==='strength'); document.getElementById('volumeWeekBtn').classList.toggle('active',p.weekType==='volume'); }
+    document.getElementById('strengthWeekBtn').addEventListener('click',()=>{ const p=getPlan(currentStrengthMonday); p.weekType=p.weekType==='strength'?null:'strength'; save(); updateWeekTypeButtons(); showToast(p.weekType==='strength'?'🔥 增力周':'取消标记'); });
+    document.getElementById('volumeWeekBtn').addEventListener('click',()=>{ const p=getPlan(currentStrengthMonday); p.weekType=p.weekType==='volume'?null:'volume'; save(); updateWeekTypeButtons(); showToast(p.weekType==='volume'?'💧 容量周':'取消标记'); });
+
+    function renderStrengthWeek(){
+      document.getElementById('currentWeekLabel').textContent=currentStrengthMonday+' 周'; updateWeekTypeButtons();
+      const plan=getPlan(currentStrengthMonday); const grid=document.getElementById('weekGrid'); grid.innerHTML='';
+      const today=formatDate(new Date()); const days=['一','二','三','四','五','六','日'];
+      for(let i=0;i<7;i++){
+        const d=new Date(currentStrengthMonday+'T00:00:00'); d.setDate(d.getDate()+i); const dateStr=formatDate(d);
+        const dayData=plan.days[i]||{muscles:[]}; const muscleNames=(dayData.muscles||[]).length>0?(dayData.muscles.map(m=>m.muscleGroup).filter(Boolean).join(',')||'休息'):'休息';
+        const cell=document.createElement('div'); cell.className='day-cell';
+        if(dateStr===today) cell.classList.add('today');
+        cell.innerHTML=`<strong>周${days[i]}</strong><br><span style="font-size:9px;">${dateStr.slice(5)}</span><br><span style="font-size:10px;">${muscleNames}</span>`;
+        cell.addEventListener('click',()=>showDayDetail(i)); grid.appendChild(cell);
+      }
+    }
+
+    function showDayDetail(dayIdx){
+      const plan=getPlan(currentStrengthMonday); if(!plan.days[dayIdx]) plan.days[dayIdx]={muscles:[]}; const day=plan.days[dayIdx]; if(!day.muscles) day.muscles=[];
+      const container=document.getElementById('dayDetail');
+      let html=`<h4>${['周一','周二','周三','周四','周五','周六','周日'][dayIdx]}</h4>`;
+      html+=`<div style="display:flex;gap:6px;margin-bottom:8px;">
+        <button id="addMuscleBtn" class="small secondary" style="flex:1;">+ 添加肌群</button>
+        <button id="restDayBtn" class="small secondary" style="flex:1;">🛌 休息日</button>
+      </div>`;
+      day.muscles.forEach((muscle,mIdx)=>{ html+=renderMuscleBlock(muscle,mIdx); });
+      container.innerHTML=html;
+      container.scrollIntoView({behavior:'smooth',block:'nearest'});
+      document.getElementById('addMuscleBtn').addEventListener('click',()=>{ day.muscles.push({muscleGroup:'',exercises:[]}); save(); renderStrengthWeek(); showDayDetail(dayIdx); });
+      document.getElementById('restDayBtn').addEventListener('click',()=>{ day.muscles=[]; save(); renderStrengthWeek(); showDayDetail(dayIdx); showToast('已设为休息日'); });
+      document.querySelectorAll('.remove-muscle-btn').forEach(btn=>{ btn.addEventListener('click',function(){ const idx=parseInt(this.dataset.midx); day.muscles.splice(idx,1); save(); renderStrengthWeek(); showDayDetail(dayIdx); }); });
+      day.muscles.forEach((muscle,mIdx)=>{
+        const groupSel=document.getElementById(`groupSel-${mIdx}`); if(groupSel){ groupSel.value=muscle.muscleGroup||''; groupSel.addEventListener('change',function(){ muscle.muscleGroup=this.value; save(); renderStrengthWeek(); showDayDetail(dayIdx); }); }
+        const area=document.getElementById(`exerciseArea-${mIdx}`); if(area){ renderExercises(area, muscle, mIdx); }
+      });
+    }
+
+    function renderMuscleBlock(muscle, idx){
+      return `<div class="muscle-block" id="muscle-block-${idx}">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:5px;">
+          <select id="groupSel-${idx}" style="flex:1;margin:0;min-height:38px;">
+            <option value="">选择肌群</option><option value="胸部">胸部</option><option value="背部">背部</option><option value="腿部">腿部</option><option value="肩部">肩部</option><option value="手臂">手臂</option>
+          </select>
+          <button class="small remove-muscle-btn" data-midx="${idx}" style="margin:0;">删除</button>
+        </div>
+        <div id="exerciseArea-${idx}" style="margin-top:6px;"></div>
+      </div>`;
+    }
+
+    function renderExercises(area, muscle, mIdx){
+      let exHtml='';
+      if(muscle.muscleGroup && muscle.muscleGroup!=='休息'){
+        const base=exerciseLibrary[muscle.muscleGroup]||[]; const custom=(currentUser.customExercises&&currentUser.customExercises[muscle.muscleGroup])?currentUser.customExercises[muscle.muscleGroup]:[];
+        const all=[...new Set([...base,...custom])];
+        exHtml+=`<div class="ex-list-container"><table class="ex-table"><thead><tr><th>动作</th><th>重量</th><th>次数</th><th>组数</th><th></th></tr></thead><tbody>`;
+        (muscle.exercises||[]).forEach((e,eIdx)=>{ exHtml+=`<tr><td>${escapeHtml(e.name)}</td><td>${e.weight}</td><td>${e.reps}</td><td>${e.sets}</td><td style="display:flex;gap:2px;justify-content:center;"><button class="small modEx" data-midx="${mIdx}" data-eidx="${eIdx}" style="padding:2px 5px;font-size:10px;">改</button><button class="small delEx" data-midx="${mIdx}" data-eidx="${eIdx}" style="padding:2px 5px;font-size:10px;">删</button></td></tr>`; });
+        exHtml+=`</tbody></table></div>`;
+        exHtml+=`<div style="display:flex;gap:4px;margin:4px 0;"><select id="exSel-${mIdx}" style="flex:1;font-size:12px;"><option value="">选择动作</option>${all.map(e=>'<option>'+escapeHtml(e)+'</option>').join('')}</select><button class="small add-custom-btn" data-midx="${mIdx}">+</button></div>`;
+        exHtml+=`<div style="display:flex;gap:3px;"><input id="wtDet-${mIdx}" placeholder="重量" type="number" step="0.5" style="flex:1;font-size:12px;" inputmode="decimal"><input id="repDet-${mIdx}" placeholder="次数" type="number" style="flex:1;font-size:12px;" inputmode="numeric"><input id="setDet-${mIdx}" placeholder="组数" type="number" style="flex:1;font-size:12px;" inputmode="numeric"></div>`;
+        exHtml+=`<button class="small add-ex-btn" data-midx="${mIdx}" style="margin-top:3px;">添加动作</button>`;
+      }
+      area.innerHTML=exHtml;
+      if(!muscle.muscleGroup||muscle.muscleGroup==='休息') return;
+      const addCustom=document.querySelector(`.add-custom-btn[data-midx="${mIdx}"]`); if(addCustom) addCustom.addEventListener('click',()=>{ const n=prompt('新动作名称：'); if(n&&n.trim()){ if(!currentUser.customExercises) currentUser.customExercises={}; if(!currentUser.customExercises[muscle.muscleGroup]) currentUser.customExercises[muscle.muscleGroup]=[]; if(!currentUser.customExercises[muscle.muscleGroup].includes(n.trim())){ currentUser.customExercises[muscle.muscleGroup].push(n.trim()); save(); renderExercises(area,muscle,mIdx); } } });
+      const addEx=document.querySelector(`.add-ex-btn[data-midx="${mIdx}"]`); if(addEx) addEx.addEventListener('click',()=>{ const s=document.getElementById(`exSel-${mIdx}`),w=document.getElementById(`wtDet-${mIdx}`),r=document.getElementById(`repDet-${mIdx}`),st=document.getElementById(`setDet-${mIdx}`); if(!s||!w||!r||!st) return; const name=s.value,weight=parseFloat(w.value),reps=parseInt(r.value),sets=parseInt(st.value); if(!name||isNaN(weight)||isNaN(reps)||isNaN(sets)) return showToast('完整填写'); if(!muscle.exercises) muscle.exercises=[]; muscle.exercises.push({name,weight,reps,sets}); save(); renderExercises(area,muscle,mIdx); });
+      document.querySelectorAll(`.modEx[data-midx="${mIdx}"]`).forEach(b=>b.addEventListener('click',function(){ const ei=parseInt(this.dataset.eidx); const ex=muscle.exercises[ei]; const nw=prompt('新重量',ex.weight),nr=prompt('新次数',ex.reps),ns=prompt('新组数',ex.sets); if(nw&&!isNaN(parseFloat(nw))&&nr&&!isNaN(parseInt(nr))&&ns&&!isNaN(parseInt(ns))){ ex.weight=parseFloat(nw); ex.reps=parseInt(nr); ex.sets=parseInt(ns); save(); renderExercises(area,muscle,mIdx); } else showToast('无效'); }));
+      document.querySelectorAll(`.delEx[data-midx="${mIdx}"]`).forEach(b=>b.addEventListener('click',function(){ const ei=parseInt(this.dataset.eidx); muscle.exercises.splice(ei,1); save(); renderExercises(area,muscle,mIdx); }));
+    }
+
+    // 1PR
+    const formulas={epley:(w,r)=>w*(1+r/30),brzycki:(w,r)=>w*(36/(37-r)),lombardi:(w,r)=>w*Math.pow(r,0.1),mayhew:(w,r)=>100*w/(101.3-2.67123*r),lander:(w,r)=>100*w/(101.3-2.67123*r)};
+    document.getElementById('prMuscleGroup').addEventListener('change',function(){ const mg=this.value; const sel=document.getElementById('prExercise'),add=document.getElementById('addPrExerciseBtn'); if(!mg){sel.classList.add('hidden');add.classList.add('hidden');return;} sel.classList.remove('hidden');add.classList.remove('hidden'); updatePrList(mg); });
+    function updatePrList(mg){ const sel=document.getElementById('prExercise'); const base=exerciseLibrary[mg]||[]; const custom=(currentUser.customExercises&&currentUser.customExercises[mg])?currentUser.customExercises[mg]:[]; const all=[...new Set([...base,...custom])]; sel.innerHTML='<option value="">选择动作</option>'+all.map(e=>'<option>'+e+'</option>').join(''); }
+    document.getElementById('addPrExerciseBtn').addEventListener('click',()=>{ const mg=document.getElementById('prMuscleGroup').value; if(!mg) return; const n=prompt('新动作：'); if(n&&n.trim()){ if(!currentUser.customExercises) currentUser.customExercises={}; if(!currentUser.customExercises[mg]) currentUser.customExercises[mg]=[]; if(!currentUser.customExercises[mg].includes(n.trim())){ currentUser.customExercises[mg].push(n.trim()); save(); updatePrList(mg); } } });
+    document.getElementById('calc1RM').addEventListener('click',()=>{ const w=parseFloat(document.getElementById('weightInput').value),r=parseInt(document.getElementById('repsInput').value); if(isNaN(w)||isNaN(r)||r<1) return showToast('有效值'); const f=document.getElementById('prFormula').value; const rm=formulas[f](w,r).toFixed(1); document.getElementById('rmResult').textContent='💥 '+rm+' kg'; document.getElementById('formulaUsed').textContent='公式: '+f; });
+
+    // 形体 (移除capture)
+    let currentPhysiqueMonday = getMonday(formatDate(new Date()));
+    function setPhysiqueMonday(d){ currentPhysiqueMonday=d; renderPhysiquePanel(); }
+    document.getElementById('physiquePrevWeek').addEventListener('click',()=>setPhysiqueMonday(addWeek(currentPhysiqueMonday,-1)));
+    document.getElementById('physiqueNextWeek').addEventListener('click',()=>setPhysiqueMonday(addWeek(currentPhysiqueMonday,1)));
+    document.getElementById('todayPhysiqueBtn').addEventListener('click',()=>setPhysiqueMonday(getMonday(formatDate(new Date()))));
+    async function renderPhysiquePanel(){
+      document.getElementById('physiqueWeekLabel').textContent=currentPhysiqueMonday+' 周'; const grid=document.getElementById('physiqueWeekGrid'); grid.innerHTML='';
+      const today=formatDate(new Date()); const days=['一','二','三','四','五','六','日'];
+      for(let i=0;i<7;i++){
+        const d=new Date(currentPhysiqueMonday+'T00:00:00'); d.setDate(d.getDate()+i); const dateStr=formatDate(d);
+        const key='physique_'+dateStr; const images=await getUserImages(currentUser,key);
+        const lastMonthDate=getMonthOffsetDate(dateStr,-1), threeMonthDate=getMonthOffsetDate(dateStr,-3);
+        const lastImages=await getUserImages(currentUser,'physique_'+lastMonthDate), threeImages=await getUserImages(currentUser,'physique_'+threeMonthDate);
+        const cell=document.createElement('div'); cell.className='day-cell'; if(dateStr===today) cell.classList.add('today');
+        cell.style.minHeight='105px'; let html=`<strong>周${days[i]}</strong><br><span style="font-size:8px;">${dateStr.slice(5)}</span><br>`;
+        if(images.length>0) html+=`<img src="${images[0]}" class="img-thumb-small" style="width:24px;height:24px;"> `; else html+='<span style="color:#555;">-</span> ';
+        html+=`<button class="small" style="padding:1px 4px;font-size:8px;">📷</button><br><div class="physique-row"><span class="physique-label">上月</span>`;
+        if(lastImages.length>0) html+=`<img src="${lastImages[0]}" class="img-thumb-small" data-date="${lastMonthDate}">`; else html+='<span style="color:#555;">无</span>';
+        html+=`</div><div class="physique-row"><span class="physique-label">3月</span>`;
+        if(threeImages.length>0) html+=`<img src="${threeImages[0]}" class="img-thumb-small" data-date="${threeMonthDate}">`; else html+='<span style="color:#555;">无</span>';
+        html+=`</div>`; cell.innerHTML=html;
+        cell.querySelector('button').addEventListener('click',(e)=>{ e.stopPropagation(); document.getElementById('physiqueTargetDate').value=dateStr; document.getElementById('physiqueImageUpload').click(); });
+        if(images.length>0){ const main=cell.querySelector(`img[src="${images[0]}"]`); if(main) main.addEventListener('click',(e)=>{ e.stopPropagation(); showPhysiqueViewer(dateStr,images,0); }); }
+        cell.querySelectorAll('.img-thumb-small[data-date]').forEach(img=>{ img.addEventListener('click',async(e)=>{ e.stopPropagation(); const td=e.target.dataset.date; const imgs=await getUserImages(currentUser,'physique_'+td); if(imgs.length>0) showPhysiqueViewer(td,imgs,0); }); });
+        grid.appendChild(cell);
+      }
+    }
+    document.getElementById('physiqueImageUpload').addEventListener('change', async function(e){
+      const files=Array.from(e.target.files); if(files.length===0) return; const dateStr=document.getElementById('physiqueTargetDate').value; if(!dateStr) return;
+      const status=document.getElementById('physiqueUploadStatus'); status.textContent='压缩中...';
+      const key='physique_'+dateStr; const existing=await getUserImages(currentUser,key);
+      const promises=files.map(file=>new Promise((resolve,reject)=>{
+        if(file.size>15*1024*1024){ reject(new Error('超过15MB')); return; }
+        const reader=new FileReader(); reader.onload=function(ev){ const img=new Image(); img.onload=function(){ const maxW=600; if(img.width>maxW){ const c=document.createElement('canvas'); c.width=maxW; c.height=Math.round(img.height*(maxW/img.width)); c.getContext('2d').drawImage(img,0,0,c.width,c.height); resolve(c.toDataURL('image/jpeg',0.65)); } else resolve(ev.target.result); }; img.onerror=()=>resolve(ev.target.result); img.src=ev.target.result; }; reader.onerror=reject; reader.readAsDataURL(file);
+      }));
+      try{
+        const results=await Promise.all(promises); const all=[...existing,...results]; await setUserImages(currentUser,key,all); save(); renderPhysiquePanel(); status.textContent='✅ 完成'; setTimeout(()=>status.textContent='',1500);
+      }catch(err){ showToast('上传失败'); status.textContent='部分失败'; }
+      e.target.value='';
+    });
+
+    function showPhysiqueViewer(dateStr,images,startIdx){
+      let idx=startIdx; const modal=document.createElement('div'); modal.className='modal';
+      modal.innerHTML=`<div class="modal-content" style="text-align:center;"><p>${dateStr}</p><div class="image-viewer"><img src="${images[idx]}" id="viewerImage" style="width:100%;"><div class="image-nav"><button id="prevImgBtn" ${idx===0?'disabled':''}>◀</button><span>${idx+1}/${images.length}</span><button id="nextImgBtn" ${idx===images.length-1?'disabled':''}>▶</button></div><div style="display:flex;gap:6px;margin-top:8px;justify-content:center;"><button id="replaceImgBtn" class="small">替换</button><button id="deleteImgBtn" class="small">删除</button><button id="closeViewerBtn" class="small secondary">关闭</button></div><input type="file" id="replaceFileInput" accept="image/*" style="display:none;"></div></div>`;
+      document.body.appendChild(modal); const close=()=>modal.remove(); modal.addEventListener('click',e=>{if(e.target===modal)close();}); document.getElementById('closeViewerBtn').addEventListener('click',close);
+      const update=async()=>{ const arr=await getUserImages(currentUser,'physique_'+dateStr); const img=document.getElementById('viewerImage'); if(img&&arr[idx]) img.src=arr[idx]; document.getElementById('prevImgBtn').disabled=idx===0; document.getElementById('nextImgBtn').disabled=idx>=arr.length-1; document.querySelector('.image-nav span').textContent=`${idx+1}/${arr.length}`; };
+      document.getElementById('prevImgBtn').addEventListener('click',()=>{if(idx>0){idx--;update();}});
+      document.getElementById('nextImgBtn').addEventListener('click',()=>{if(idx<images.length-1){idx++;update();}});
+      document.getElementById('replaceImgBtn').addEventListener('click',()=>document.getElementById('replaceFileInput').click());
+      document.getElementById('replaceFileInput').addEventListener('change',async function(e){ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=async function(ev){ const arr=await getUserImages(currentUser,'physique_'+dateStr); arr[idx]=ev.target.result; await setUserImages(currentUser,'physique_'+dateStr,arr); save(); update(); }; reader.readAsDataURL(file); });
+      document.getElementById('deleteImgBtn').addEventListener('click',async()=>{ const arr=await getUserImages(currentUser,'physique_'+dateStr); arr.splice(idx,1); if(arr.length===0) await deleteUserImages(currentUser,'physique_'+dateStr); else await setUserImages(currentUser,'physique_'+dateStr,arr); save(); const updated=await getUserImages(currentUser,'physique_'+dateStr); if(updated.length>0){ if(idx>=updated.length) idx=updated.length-1; update(); } else { close(); renderPhysiquePanel(); } });
+    }
+
+    // 朋友
+    function renderFriendList(){
+      const list=document.getElementById('friendList'); if(!currentUser||!currentUser.friends.length){ list.innerHTML='<p style="text-align:center;color:#888;">暂无好友</p>'; document.getElementById('friendData').style.display='none'; return; }
+      let html='<h4>好友</h4>'; currentUser.friends.forEach(uid=>{ const u=allUsers[uid]; html+=`<div class="friend-list-item"><span>${u?escapeHtml(u.username):'未知'} (${uid})</span><div><button class="small viewFriendBtn" data-uid="${uid}">查看</button><button class="small hideFriendBtn">隐藏</button></div></div>`; });
+      list.innerHTML=html; document.querySelectorAll('.viewFriendBtn').forEach(b=>b.addEventListener('click',function(){ currentFriendUid=this.dataset.uid; displayFriendReport(currentFriendUid); })); document.querySelectorAll('.hideFriendBtn').forEach(b=>b.addEventListener('click',()=>document.getElementById('friendData').style.display='none'));
+      if(currentFriendUid&&currentUser.friends.includes(currentFriendUid)) displayFriendReport(currentFriendUid);
+    }
+    document.getElementById('exportMyDataBtn').addEventListener('click',()=>{ if(!currentUser) return; const d=JSON.stringify(currentUser); const enc=btoa(unescape(encodeURIComponent(d))); navigator.clipboard.writeText(enc).then(()=>showToast('已复制')).catch(()=>{ const ta=document.createElement('textarea'); ta.value=enc; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('已复制'); }); });
+    document.getElementById('exportMyDataFileBtn').addEventListener('click',()=>{ if(!currentUser) return; const blob=new Blob([JSON.stringify(currentUser)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`solo_backup_${currentUser.username}.json`; a.click(); showToast('已下载'); });
+    document.getElementById('importFriendDataBtn').addEventListener('click',()=>{ const enc=prompt('粘贴好友数据：'); if(!enc) return; try{ const json=decodeURIComponent(escape(atob(enc))); const imp=JSON.parse(json); if(!imp.uid||!imp.username) throw new Error(); allUsers[imp.uid]=imp; save(); showToast('导入成功'); renderFriendList(); }catch(e){ showToast('格式错误'); } });
+    document.getElementById('addFriendBtn').addEventListener('click',()=>{ const uid=document.getElementById('friendUidInput').value.trim(); if(!uid) return showToast('输入UID'); if(uid===currentUser.uid) return showToast('不能添加自己'); if(!currentUser.friends.includes(uid)){ currentUser.friends.push(uid); save(); showToast('添加成功'); renderFriendList(); } else showToast('已在列表'); currentFriendUid=uid; displayFriendReport(uid); });
+    document.getElementById('refreshFriendDataBtn').addEventListener('click',()=>{ if(currentFriendUid) displayFriendReport(currentFriendUid); else showToast('先选择好友'); });
+
+    function displayFriendReport(uid){ const u=allUsers[uid]; const c=document.getElementById('friendData'); if(!u){ c.innerHTML='<p>好友暂无数据</p>'; c.style.display='block'; return; } c.innerHTML=generateReportContentForUser(u); c.style.display='block'; }
+    function generateReportContentForUser(user){
+      const today=formatDate(new Date()); const thisMonday=getMonday(today); const thisPlan=user.weeklyPlans[thisMonday]||{days:{},weekType:null};
+      let html='<h3>'+escapeHtml(user.username)+' 周报</h3>'; const w=user.weightRecords.filter(r=>r.date>=thisMonday); if(w.length) html+=`<p>本周体重记录${w.length}条</p>`; return html+'<p>训练数据略</p>';
+    }
+
+    document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>switchPanel(b.dataset.panel)));
+    const lastUID=localStorage.getItem('lastLoggedUID_v2'); if(lastUID&&allUsers[lastUID]){ currentUser=allUsers[lastUID]; showMain(); }
+    window.addEventListener('beforeunload',()=>{ if(currentUser) localStorage.setItem('lastLoggedUID_v2',currentUser.uid); saveAllUsers(); });
+    setInterval(()=>{ if(currentUser) saveAllUsers(); },30000);
+    document.addEventListener('touchstart',function(){},{passive:true});
+    console.log('⚡ 我独自升级 移动优化版');
+  })();
+</script>
 </body>
 </html>
