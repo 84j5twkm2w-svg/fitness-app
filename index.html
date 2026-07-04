@@ -360,7 +360,6 @@
     function parseDateToISO(s) { if(!s) return null; let d=new Date(s); if(!isNaN(d.getTime())) return formatDate(d); const p=String(s).split(/[-/]/); if(p.length===3){ const y=+p[0],m=+p[1],day=+p[2]; if(y>1900&&m>=1&&m<=12&&day>=1&&day<=31) return `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`; } return null; }
     function escapeHtml(t) { return String(t).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
 
-    // 安全的 Base64 编解码
     function utf8ToBase64(str) { const bytes = new TextEncoder().encode(str); const binString = Array.from(bytes, byte => String.fromCodePoint(byte)).join(''); return btoa(binString); }
     function base64ToUtf8(b64) { const binString = atob(b64); const bytes = Uint8Array.from(binString, m => m.codePointAt(0)); return new TextDecoder().decode(bytes); }
 
@@ -386,7 +385,7 @@
       if(name==='friends') renderFriendList();
     }
 
-    // 体重相关函数（已完整）
+    // 体重面板
     document.getElementById('manualDateToggle').addEventListener('click', function(){ this.classList.toggle('active'); const c=this.nextElementSibling; c.style.display=c.style.display==='block'?'none':'block'; });
     document.getElementById('quickRecordBtn').addEventListener('click', ()=>{
       if(!currentUser) return; const w=parseFloat(document.getElementById('quickWeight').value); if(isNaN(w)||w<20||w>300) return showToast('请输入合理体重');
@@ -431,7 +430,7 @@
       const f=recs[0],l=recs[recs.length-1]; const ch=l.weight-f.weight; const days=Math.max(1,Math.round((new Date(l.date)-new Date(f.date))/864e5)); const wk=(ch/(days/7)).toFixed(2);
       el.textContent=`📊 ${recs.length}条 | 趋势${ch>0?'+':''}${ch.toFixed(1)}kg | 周均${wk>0?'+':''}${wk}kg`;
     }
-    // Excel 导入导出
+    // Excel
     document.getElementById('downloadTemplateBtn').addEventListener('click', ()=>{ if(typeof XLSX==='undefined') return showToast('加载中'); const ws=XLSX.utils.aoa_to_sheet([['日期','体重','增肌期/减脂期'],['2025-01-01',70,'增肌期']]); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'体重'); XLSX.writeFile(wb,'体重模板.xlsx'); });
     document.getElementById('xlsxUpload').addEventListener('change', function(e){
       const file=e.target.files[0]; if(!file) return; if(typeof XLSX==='undefined') return showToast('加载中');
@@ -449,7 +448,7 @@
       currentUser.weightRecords=pendingXlsxRecords; currentUser.weightRecords.sort((a,b)=>a.date.localeCompare(b.date)); save(); pendingXlsxRecords=[]; document.getElementById('mapXlsxBtn').disabled=true; weightPeriod='all'; document.getElementById('periodDropdown').value='all'; renderWeightPanel(); showToast('已替换');
     });
 
-    // ========== 本周统计（修复） ==========
+    // 本周统计
     function generateReportContent() {
       if (!currentUser) return '<p>请先登录</p>';
       const today = formatDate(new Date()); const thisMonday = getMonday(today); const lastMonday = addWeek(thisMonday, -1);
@@ -504,7 +503,7 @@
       modal.querySelector('.modal-content button').addEventListener('click',close);
     }
 
-    // ========== 力量面板（优化按钮布局，去除完成添加） ==========
+    // 力量面板（优化布局，无完成添加）
     let currentStrengthMonday = getMonday(formatDate(new Date()));
     function setStrengthMonday(d){ currentStrengthMonday=d; renderStrengthWeek(); }
     document.getElementById('prevWeekBtn').addEventListener('click', ()=>setStrengthMonday(addWeek(currentStrengthMonday,-1)));
@@ -611,7 +610,6 @@
         if(!name||isNaN(weight)||isNaN(reps)||isNaN(sets)) return showToast('完整填写');
         if(!muscle.exercises) muscle.exercises=[];
         muscle.exercises.push({name,weight,reps,sets}); save();
-        // 添加成功后自动隐藏输入区域，并重置按钮文字
         if(inputArea) inputArea.style.display = 'none';
         if(showAdd) showAdd.textContent = '+ 新增动作';
         renderExerciseArea(container,muscle,mIdx);
@@ -625,9 +623,87 @@
       }));
     }
 
-    // 1PR、形体、朋友等模块（已完整保留，此处省略以节省篇幅，但实际代码中完整包含）
-    // 因之前版本已提供，不再重复粘贴，请放心，完整文件已全部保留。
-    // 以下为简化占位，实际文件中已包含所有功能。
+    // 1PR
+    const formulas={epley:(w,r)=>w*(1+r/30),brzycki:(w,r)=>w*(36/(37-r)),lombardi:(w,r)=>w*Math.pow(r,0.1),mayhew:(w,r)=>100*w/(101.3-2.67123*r),lander:(w,r)=>100*w/(101.3-2.67123*r)};
+    document.getElementById('prMuscleGroup').addEventListener('change',function(){const mg=this.value;const s=document.getElementById('prExercise'),a=document.getElementById('addPrExerciseBtn');if(!mg){s.classList.add('hidden');a.classList.add('hidden');return;}s.classList.remove('hidden');a.classList.remove('hidden');updatePrList(mg);});
+    function updatePrList(mg){const s=document.getElementById('prExercise');const base=exerciseLibrary[mg]||[],cust=(currentUser.customExercises&&currentUser.customExercises[mg])?currentUser.customExercises[mg]:[];s.innerHTML='<option value="">选择动作</option>'+[...new Set([...base,...cust])].map(e=>'<option>'+e+'</option>').join('');}
+    document.getElementById('addPrExerciseBtn').addEventListener('click',()=>{const mg=document.getElementById('prMuscleGroup').value;if(!mg)return;const n=prompt('新动作：');if(n?.trim()){if(!currentUser.customExercises)currentUser.customExercises={};if(!currentUser.customExercises[mg])currentUser.customExercises[mg]=[];if(!currentUser.customExercises[mg].includes(n.trim())){currentUser.customExercises[mg].push(n.trim());save();updatePrList(mg);}}});
+    document.getElementById('calc1RM').addEventListener('click',()=>{const w=parseFloat(document.getElementById('weightInput').value),r=parseInt(document.getElementById('repsInput').value);if(isNaN(w)||isNaN(r)||r<1)return showToast('有效值');const rm=formulas[document.getElementById('prFormula').value](w,r).toFixed(1);document.getElementById('rmResult').textContent='💥 '+rm+' kg';});
+
+    // 形体面板
+    let currentPhysiqueMonday = getMonday(formatDate(new Date()));
+    function setPhysiqueMonday(d){ currentPhysiqueMonday=d; renderPhysiquePanel(); }
+    document.getElementById('physiquePrevWeek').addEventListener('click',()=>setPhysiqueMonday(addWeek(currentPhysiqueMonday,-1)));
+    document.getElementById('physiqueNextWeek').addEventListener('click',()=>setPhysiqueMonday(addWeek(currentPhysiqueMonday,1)));
+    document.getElementById('todayPhysiqueBtn').addEventListener('click',()=>setPhysiqueMonday(getMonday(formatDate(new Date()))));
+    async function renderPhysiquePanel(){
+      document.getElementById('physiqueWeekLabel').textContent=currentPhysiqueMonday+' 周'; const grid=document.getElementById('physiqueWeekGrid'); grid.innerHTML='';
+      const today=formatDate(new Date()), days=['一','二','三','四','五','六','日'];
+      for(let i=0;i<7;i++){ const d=new Date(currentPhysiqueMonday+'T00:00:00'); d.setDate(d.getDate()+i); const ds=formatDate(d); const key='physique_'+ds; const imgs=await getUserImages(currentUser,key); const lm=getMonthOffset(ds,-1), t3=getMonthOffset(ds,-3); const lmgs=await getUserImages(currentUser,'physique_'+lm), t3gs=await getUserImages(currentUser,'physique_'+t3); const cell=document.createElement('div'); cell.className='day-cell'; if(ds===today) cell.classList.add('today'); let h=`<strong>周${days[i]}</strong><br><span style="font-size:8px;">${ds.slice(5)}</span><br>`; if(imgs.length) h+=`<img src="${imgs[0]}" class="img-thumb-small" style="width:24px;"> `; else h+='<span style="color:#555;">-</span> '; h+=`<button class="small" style="padding:1px 4px;font-size:8px;">📷</button><br><div class="physique-row"><span class="physique-label">上月</span>`; if(lmgs.length) h+=`<img src="${lmgs[0]}" class="img-thumb-small" data-date="${lm}">`; else h+='<span style="color:#555;">无</span>'; h+=`</div><div class="physique-row"><span class="physique-label">3月</span>`; if(t3gs.length) h+=`<img src="${t3gs[0]}" class="img-thumb-small" data-date="${t3}">`; else h+='<span style="color:#555;">无</span>'; h+=`</div>`; cell.innerHTML=h; cell.querySelector('button').addEventListener('click',e=>{e.stopPropagation();document.getElementById('physiqueTargetDate').value=ds;document.getElementById('physiqueImageUpload').click();}); if(imgs.length){ cell.querySelector(`img[src="${imgs[0]}"]`)?.addEventListener('click',e=>{e.stopPropagation();showPhysiqueViewer(ds,imgs,0);}); } cell.querySelectorAll('.img-thumb-small[data-date]').forEach(img=>img.addEventListener('click',async e=>{e.stopPropagation();const td=e.target.dataset.date;const arr=await getUserImages(currentUser,'physique_'+td);if(arr.length)showPhysiqueViewer(td,arr,0);})); grid.appendChild(cell); }
+    }
+    document.getElementById('physiqueImageUpload').addEventListener('change', async function(e){
+      const files=Array.from(e.target.files); if(!files.length) return; const ds=document.getElementById('physiqueTargetDate').value; if(!ds) return;
+      const status=document.getElementById('physiqueUploadStatus'); status.textContent='压缩中...'; const key='physique_'+ds; const exist=await getUserImages(currentUser,key);
+      const proms=files.map(f=>new Promise((resolve,reject)=>{
+        if(f.size>15*1024*1024){reject(new Error('>15MB'));return;} const r=new FileReader(); r.onload=ev=>{const img=new Image();img.onload=()=>{if(img.width>600){const c=document.createElement('canvas');c.width=600;c.height=Math.round(img.height*(600/img.width));c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',0.65));}else resolve(ev.target.result);};img.onerror=()=>resolve(ev.target.result);img.src=ev.target.result;};r.onerror=reject;r.readAsDataURL(f);}));
+      try{const res=await Promise.all(proms);const all=[...exist,...res];await setUserImages(currentUser,key,all);save();renderPhysiquePanel();status.textContent='✅ 完成';setTimeout(()=>status.textContent='',1500);}catch(err){showToast('上传失败');} e.target.value='';
+    });
+    function showPhysiqueViewer(dateStr,images,idx){
+      const modal=document.createElement('div');modal.className='modal';
+      modal.innerHTML=`<div class="modal-content" style="text-align:center;"><p>${dateStr}</p><div class="image-viewer"><img src="${images[idx]}" id="vImg"><div class="image-nav"><button id="prevBtn" ${idx===0?'disabled':''}>◀</button><span>${idx+1}/${images.length}</span><button id="nextBtn" ${idx===images.length-1?'disabled':''}>▶</button></div><div style="display:flex;gap:6px;margin-top:8px;justify-content:center;"><button id="repBtn" class="small">替换</button><button id="delBtn" class="small">删除</button><button id="clsBtn" class="small secondary">关闭</button></div><input type="file" id="repFile" accept="image/*" style="display:none;"></div></div>`;
+      document.body.appendChild(modal); const close=()=>modal.remove(); modal.addEventListener('click',e=>{if(e.target===modal)close();}); document.getElementById('clsBtn').addEventListener('click',close);
+      const update=async()=>{const arr=await getUserImages(currentUser,'physique_'+dateStr);document.getElementById('vImg').src=arr[idx];document.getElementById('prevBtn').disabled=idx===0;document.getElementById('nextBtn').disabled=idx>=arr.length-1;document.querySelector('.image-nav span').textContent=`${idx+1}/${arr.length}`;};
+      document.getElementById('prevBtn').addEventListener('click',()=>{if(idx>0){idx--;update();}}); document.getElementById('nextBtn').addEventListener('click',()=>{if(idx<images.length-1){idx++;update();}});
+      document.getElementById('repBtn').addEventListener('click',()=>document.getElementById('repFile').click());
+      document.getElementById('repFile').addEventListener('change',async function(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=async ev=>{const arr=await getUserImages(currentUser,'physique_'+dateStr);arr[idx]=ev.target.result;await setUserImages(currentUser,'physique_'+dateStr,arr);save();update();};reader.readAsDataURL(file);});
+      document.getElementById('delBtn').addEventListener('click',async()=>{const arr=await getUserImages(currentUser,'physique_'+dateStr);arr.splice(idx,1);if(!arr.length)await deleteUserImages(currentUser,'physique_'+dateStr);else await setUserImages(currentUser,'physique_'+dateStr,arr);save();const upd=await getUserImages(currentUser,'physique_'+dateStr);if(upd.length){if(idx>=upd.length)idx=upd.length-1;update();}else{close();renderPhysiquePanel();}});
+    }
+
+    // 朋友面板
+    function renderFriendList(){
+      const list=document.getElementById('friendList'); if(!currentUser?.friends.length){ list.innerHTML='<p style="text-align:center;color:#888;">暂无好友</p>'; document.getElementById('friendData').style.display='none'; return; }
+      let h='<h4>好友</h4>'; currentUser.friends.forEach(uid=>{const u=allUsers[uid];h+=`<div class="friend-list-item"><span>${u?escapeHtml(u.username):'未知'} (${uid})</span><div><button class="small viewFriendBtn" data-uid="${uid}">查看</button><button class="small hideFriendBtn">隐藏</button></div></div>`;});
+      list.innerHTML=h; document.querySelectorAll('.viewFriendBtn').forEach(b=>b.addEventListener('click',function(){currentFriendUid=this.dataset.uid;displayFriendReport(currentFriendUid);})); document.querySelectorAll('.hideFriendBtn').forEach(b=>b.addEventListener('click',()=>document.getElementById('friendData').style.display='none'));
+      if(currentFriendUid && currentUser.friends.includes(currentFriendUid)) displayFriendReport(currentFriendUid);
+    }
+    document.getElementById('exportMyDataBtn').addEventListener('click',()=>{if(!currentUser)return;const json=JSON.stringify(currentUser);const encoded=utf8ToBase64(json);navigator.clipboard.writeText(encoded).then(()=>showToast('已复制')).catch(()=>{const ta=document.createElement('textarea');ta.value=encoded;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('已复制');});});
+    document.getElementById('exportMyDataFileBtn').addEventListener('click',()=>{if(!currentUser)return;const blob=new Blob([JSON.stringify(currentUser)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`solo_${currentUser.username}.json`;a.click();});
+    document.getElementById('importFriendDataBtn').addEventListener('click',()=>{const encoded=prompt('粘贴好友数据：');if(!encoded)return;try{const json=base64ToUtf8(encoded);const imp=JSON.parse(json);if(!imp.uid||!imp.username)throw new Error();allUsers[imp.uid]=imp;save();showToast('导入成功');renderFriendList();}catch(e){showToast('格式错误');}});
+    document.getElementById('addFriendBtn').addEventListener('click',()=>{const uid=document.getElementById('friendUidInput').value.trim();if(!uid)return showToast('输入UID');if(uid===currentUser.uid)return showToast('不能添加自己');if(!currentUser.friends.includes(uid)){currentUser.friends.push(uid);save();showToast('已添加');renderFriendList();} currentFriendUid=uid;displayFriendReport(uid);});
+    document.getElementById('refreshFriendDataBtn').addEventListener('click',()=>{if(currentFriendUid)displayFriendReport(currentFriendUid);else showToast('先选择好友');});
+    function displayFriendReport(uid){const u=allUsers[uid];const c=document.getElementById('friendData');if(!u){c.innerHTML='<p>好友暂无数据</p>';c.style.display='block';return;}c.innerHTML=`<h3>${escapeHtml(u.username)} 周报</h3><p>体重记录${u.weightRecords.length}条</p>`;c.style.display='block';}
+
+    // 登录注册
+    document.getElementById('loginBtn').addEventListener('click',()=>{
+      const un=document.getElementById('username').value.trim(), pw=document.getElementById('password').value;
+      if(!un||!pw) return showAuthMsg('请输入用户名密码');
+      const user=Object.values(allUsers).find(u=>u.username===un&&u.password===pw);
+      if(!user) return showAuthMsg('用户名或密码错误');
+      currentUser=user; addLoginHistory(user.username,user.uid); showMain();
+    });
+    document.getElementById('regBtn').addEventListener('click',()=>{
+      const un=document.getElementById('username').value.trim(), pw=document.getElementById('password').value;
+      if(!un||!pw) return showAuthMsg('请输入用户名密码');
+      if(un.length<2) return showAuthMsg('用户名至少2字符');
+      if(pw.length<3) return showAuthMsg('密码至少3位');
+      if(Object.values(allUsers).some(u=>u.username===un)) return showAuthMsg('用户名已存在');
+      const uid=generateUID(); allUsers[uid]={uid,username:un,password:pw,weightRecords:[],weeklyPlans:{},friends:[],customExercises:{}};
+      save(); showAuthMsg('✅ 注册成功！UID: '+uid, false);
+      document.getElementById('username').value=''; document.getElementById('password').value='';
+    });
+    document.getElementById('logoutBtn').addEventListener('click',()=>{
+      currentUser=null; localStorage.removeItem('lastLoggedUID_v2');
+      document.getElementById('auth-screen').classList.remove('hidden');
+      document.getElementById('main-screen').classList.add('hidden');
+    });
+
+    document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>switchPanel(b.dataset.panel)));
+    const lastUID = localStorage.getItem('lastLoggedUID_v2');
+    if(lastUID && allUsers[lastUID]){ currentUser = allUsers[lastUID]; showMain(); }
+    window.addEventListener('beforeunload', ()=>{ if(currentUser) localStorage.setItem('lastLoggedUID_v2', currentUser.uid); saveAllUsers(); });
+    setInterval(()=>{ if(currentUser) saveAllUsers(); }, 30000);
+    document.addEventListener('touchstart', ()=>{}, {passive: true});
+    console.log('⚡ 我独自升级 - 全功能版已运行');
   })();
 </script>
 </body>
