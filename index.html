@@ -359,6 +359,18 @@
     function parseDateToISO(s) { if(!s) return null; let d=new Date(s); if(!isNaN(d.getTime())) return formatDate(d); const p=String(s).split(/[-/]/); if(p.length===3){ const y=+p[0],m=+p[1],day=+p[2]; if(y>1900&&m>=1&&m<=12&&day>=1&&day<=31) return `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`; } return null; }
     function escapeHtml(t) { return String(t).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
 
+    // 安全的 Base64 编解码（不使用弃用的escape/unescape）
+    function utf8ToBase64(str) {
+      const bytes = new TextEncoder().encode(str);
+      const binString = Array.from(bytes, byte => String.fromCodePoint(byte)).join('');
+      return btoa(binString);
+    }
+    function base64ToUtf8(b64) {
+      const binString = atob(b64);
+      const bytes = Uint8Array.from(binString, m => m.codePointAt(0));
+      return new TextDecoder().decode(bytes);
+    }
+
     function showAuthMsg(msg, err=true) { const el=document.getElementById('authMsg'); if(!el) return; el.textContent=msg; el.style.color=err?'#ff6b6b':'#2ecc71'; setTimeout(()=>el.textContent='',3000); }
 
     function showMain() {
@@ -381,7 +393,7 @@
       if(name==='friends') renderFriendList();
     }
 
-    // 体重
+    // 体重面板（完整保留）
     document.getElementById('manualDateToggle').addEventListener('click', function(){ this.classList.toggle('active'); const c=this.nextElementSibling; c.style.display=c.style.display==='block'?'none':'block'; });
     document.getElementById('quickRecordBtn').addEventListener('click', ()=>{
       if(!currentUser) return; const w=parseFloat(document.getElementById('quickWeight').value); if(isNaN(w)||w<20||w>300) return showToast('请输入合理体重');
@@ -444,7 +456,7 @@
       currentUser.weightRecords=pendingXlsxRecords; currentUser.weightRecords.sort((a,b)=>a.date.localeCompare(b.date)); save(); pendingXlsxRecords=[]; document.getElementById('mapXlsxBtn').disabled=true; weightPeriod='all'; document.getElementById('periodDropdown').value='all'; renderWeightPanel(); showToast('已替换');
     });
 
-    // 力量
+    // 力量面板（含折叠与完成添加）
     let currentStrengthMonday = getMonday(formatDate(new Date()));
     function setStrengthMonday(d){ currentStrengthMonday=d; renderStrengthWeek(); }
     document.getElementById('prevWeekBtn').addEventListener('click', ()=>setStrengthMonday(addWeek(currentStrengthMonday,-1)));
@@ -558,7 +570,7 @@
     document.getElementById('addPrExerciseBtn').addEventListener('click',()=>{const mg=document.getElementById('prMuscleGroup').value;if(!mg)return;const n=prompt('新动作：');if(n?.trim()){if(!currentUser.customExercises)currentUser.customExercises={};if(!currentUser.customExercises[mg])currentUser.customExercises[mg]=[];if(!currentUser.customExercises[mg].includes(n.trim())){currentUser.customExercises[mg].push(n.trim());save();updatePrList(mg);}}});
     document.getElementById('calc1RM').addEventListener('click',()=>{const w=parseFloat(document.getElementById('weightInput').value),r=parseInt(document.getElementById('repsInput').value);if(isNaN(w)||isNaN(r)||r<1)return showToast('有效值');const rm=formulas[document.getElementById('prFormula').value](w,r).toFixed(1);document.getElementById('rmResult').textContent='💥 '+rm+' kg';});
 
-    // 形体
+    // 形体面板
     let currentPhysiqueMonday = getMonday(formatDate(new Date()));
     function setPhysiqueMonday(d){ currentPhysiqueMonday=d; renderPhysiquePanel(); }
     document.getElementById('physiquePrevWeek').addEventListener('click',()=>setPhysiqueMonday(addWeek(currentPhysiqueMonday,-1)));
@@ -587,19 +599,56 @@
       document.getElementById('delBtn').addEventListener('click',async()=>{const arr=await getUserImages(currentUser,'physique_'+dateStr);arr.splice(idx,1);if(!arr.length)await deleteUserImages(currentUser,'physique_'+dateStr);else await setUserImages(currentUser,'physique_'+dateStr,arr);save();const upd=await getUserImages(currentUser,'physique_'+dateStr);if(upd.length){if(idx>=upd.length)idx=upd.length-1;update();}else{close();renderPhysiquePanel();}});
     }
 
-    // 朋友
+    // 朋友面板（使用安全的Base64编解码）
     function renderFriendList(){
       const list=document.getElementById('friendList'); if(!currentUser?.friends.length){ list.innerHTML='<p style="text-align:center;color:#888;">暂无好友</p>'; document.getElementById('friendData').style.display='none'; return; }
       let h='<h4>好友</h4>'; currentUser.friends.forEach(uid=>{const u=allUsers[uid];h+=`<div class="friend-list-item"><span>${u?escapeHtml(u.username):'未知'} (${uid})</span><div><button class="small viewFriendBtn" data-uid="${uid}">查看</button><button class="small hideFriendBtn">隐藏</button></div></div>`;});
       list.innerHTML=h; document.querySelectorAll('.viewFriendBtn').forEach(b=>b.addEventListener('click',function(){currentFriendUid=this.dataset.uid;displayFriendReport(currentFriendUid);})); document.querySelectorAll('.hideFriendBtn').forEach(b=>b.addEventListener('click',()=>document.getElementById('friendData').style.display='none'));
       if(currentFriendUid && currentUser.friends.includes(currentFriendUid)) displayFriendReport(currentFriendUid);
     }
-    document.getElementById('exportMyDataBtn').addEventListener('click',()=>{if(!currentUser)return;const d=JSON.stringify(currentUser);const enc=btoa(unescape(encodeURIComponent(d)));navigator.clipboard.writeText(enc).then(()=>showToast('已复制')).catch(()=>{const ta=document.createElement('textarea');ta.value=enc;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('已复制');});});
-    document.getElementById('exportMyDataFileBtn').addEventListener('click',()=>{if(!currentUser)return;const blob=new Blob([JSON.stringify(currentUser)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`solo_${currentUser.username}.json`;a.click();});
-    document.getElementById('importFriendDataBtn').addEventListener('click',()=>{const enc=prompt('粘贴好友数据：');if(!enc)return;try{const json=decodeURIComponent(escape(atob(enc)));const imp=JSON.parse(json);if(!imp.uid||!imp.username)throw new Error();allUsers[imp.uid]=imp;save();showToast('导入成功');renderFriendList();}catch(e){showToast('格式错误');}});
-    document.getElementById('addFriendBtn').addEventListener('click',()=>{const uid=document.getElementById('friendUidInput').value.trim();if(!uid)return showToast('输入UID');if(uid===currentUser.uid)return showToast('不能添加自己');if(!currentUser.friends.includes(uid)){currentUser.friends.push(uid);save();showToast('已添加');renderFriendList();} currentFriendUid=uid;displayFriendReport(uid);});
-    document.getElementById('refreshFriendDataBtn').addEventListener('click',()=>{if(currentFriendUid)displayFriendReport(currentFriendUid);else showToast('先选择好友');});
-    function displayFriendReport(uid){const u=allUsers[uid];const c=document.getElementById('friendData');if(!u){c.innerHTML='<p>好友暂无数据</p>';c.style.display='block';return;}c.innerHTML=`<h3>${escapeHtml(u.username)} 周报</h3><p>体重记录${u.weightRecords.length}条</p>`;c.style.display='block';}
+    document.getElementById('exportMyDataBtn').addEventListener('click',()=>{
+      if(!currentUser) return;
+      const json = JSON.stringify(currentUser);
+      const encoded = utf8ToBase64(json);
+      navigator.clipboard.writeText(encoded).then(()=>showToast('已复制')).catch(()=>{
+        const ta=document.createElement('textarea'); ta.value=encoded; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta); showToast('已复制');
+      });
+    });
+    document.getElementById('exportMyDataFileBtn').addEventListener('click',()=>{
+      if(!currentUser) return;
+      const blob = new Blob([JSON.stringify(currentUser)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+      a.download=`solo_${currentUser.username}.json`; a.click();
+    });
+    document.getElementById('importFriendDataBtn').addEventListener('click',()=>{
+      const encoded = prompt('粘贴好友数据：');
+      if(!encoded) return;
+      try {
+        const json = base64ToUtf8(encoded);
+        const imp = JSON.parse(json);
+        if(!imp.uid || !imp.username) throw new Error('无效数据');
+        allUsers[imp.uid] = imp;
+        save();
+        showToast('导入成功');
+        renderFriendList();
+      } catch(e) { showToast('格式错误'); }
+    });
+    document.getElementById('addFriendBtn').addEventListener('click',()=>{
+      const uid=document.getElementById('friendUidInput').value.trim();
+      if(!uid) return showToast('输入UID');
+      if(uid===currentUser.uid) return showToast('不能添加自己');
+      if(!currentUser.friends.includes(uid)){ currentUser.friends.push(uid); save(); showToast('已添加'); renderFriendList(); }
+      currentFriendUid=uid; displayFriendReport(uid);
+    });
+    document.getElementById('refreshFriendDataBtn').addEventListener('click',()=>{
+      if(currentFriendUid) displayFriendReport(currentFriendUid); else showToast('先选择好友');
+    });
+    function displayFriendReport(uid){
+      const u=allUsers[uid]; const c=document.getElementById('friendData');
+      if(!u){ c.innerHTML='<p>好友暂无数据</p>'; c.style.display='block'; return; }
+      c.innerHTML=`<h3>${escapeHtml(u.username)} 周报</h3><p>体重记录${u.weightRecords.length}条</p>`; c.style.display='block';
+    }
 
     // 登录/注册
     document.getElementById('loginBtn').addEventListener('click',()=>{
@@ -631,7 +680,7 @@
     window.addEventListener('beforeunload', ()=>{ if(currentUser) localStorage.setItem('lastLoggedUID_v2', currentUser.uid); saveAllUsers(); });
     setInterval(()=>{ if(currentUser) saveAllUsers(); }, 30000);
     document.addEventListener('touchstart', ()=>{}, {passive: true});
-    console.log('⚡ 我独自升级 - 全功能恢复版');
+    console.log('⚡ 我独自升级 - 安全版本已运行');
   })();
 </script>
 </body>
